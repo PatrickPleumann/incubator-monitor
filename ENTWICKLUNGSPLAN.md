@@ -116,7 +116,7 @@ Standortbestimmung, nicht zwingend den Stand von jetzt.
 - [ ] 4.3 Abnahmeliste von Hand durchgegangen
 
 **Etappe 5 — Abrunden**
-- [ ] 5.1 README mit den vier Abschnitten
+- [ ] 5.1 README überarbeiten (Grundfassung steht seit 01.09.2026)
 - [ ] 5.2 Frischer Klon baut, testet und startet
 
 ---
@@ -643,3 +643,4 @@ umgehen ist der einzige Fehler, den man dabei machen kann.
 | 31.08.2026 | Fenstertitel auf „Incubator Monitor", Projektname `incubator-monitor` | Alles, was im Code oder als Bezeichner auftaucht, ist einheitlich englisch. Der deutsche Titel war die letzte Ausnahme und hätte im Fenster neben englischen Bezeichnern gestanden. Dieses Dokument bleibt deutsch. |
 | 31.08.2026 | JUnit 6.0.0 statt JUnit 5 (Aufgabe 1.3) | Der IntelliJ-Assistent hat die neue Hauptversion eingetragen. Für die hier benutzten Zusicherungen ist der Unterschied null — die Paketnamen `org.junit.jupiter.api.*` sind unverändert. Am Build zu drehen, nur damit eine Zahl zur Doku passt, wäre der schlechtere Tausch. Die Abweichung steht dafür hier. |
 | 01.09.2026 | Aufgabe 2.3 in zwei Hälften geteilt: erst Tests 1–4, 6, 7 und die Reparatur des `close()`-Befunds, dann Konstruktor mit Fehler-Handler, Test 5 und die Reparatur von `fire()` | Test 5 braucht den Konstruktor `EventSupport(Consumer<RuntimeException>)`, den es im übernommenen Code nicht gab. Als ein Block geschrieben hätte er nicht kompiliert — und ein Übersetzungsfehler hält den ganzen Testlauf an, sodass auch der echte rote Test 4 nicht mehr sichtbar gewesen wäre. So wurde jeder der beiden Befunde einzeln rot gesehen. |
+| 01.09.2026 | README bereits jetzt angelegt statt erst in Aufgabe 5.1 | Das Repository ist öffentlich, und auf der Startseite rendert GitHub ausschließlich `README.md` — ohne sie sieht ein Besucher eine nackte Dateiliste. Aufgabe 5.1 wird dadurch zu „README überarbeiten": Die vier geforderten Abschnitte werden am Ende gegengeprüft und um das ergänzt, was erst dann feststeht (Screenshot, endgültige offene Punkte). |
