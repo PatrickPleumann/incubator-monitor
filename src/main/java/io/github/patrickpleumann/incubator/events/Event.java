@@ -4,4 +4,6 @@ import java.util.function.Consumer;
 public interface Event<T>
 {
     Subscription subscribe(Consumer<? super T> listener);
+
+
 }
