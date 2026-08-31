@@ -1,104 +1,108 @@
-# Inkubator-Monitor
+# Incubator Monitor
 
-> **Stand: Etappe 2 von 5 abgeschlossen** — 01.09.2026
+**English** · [Deutsch](README.de.md)
 
-Ein simuliertes Laborgerät in Java: ein CO₂-Inkubator, der Zellkulturen auf einer Zieltemperatur
-hält, seine Messwerte aus einem eigenen Thread meldet und von einer JavaFX-Oberfläche überwacht
-wird.
+> **Status: stage 2 of 5 complete** — 2026-09-01
 
----
-
-## Worum es geht
-
-Es gibt **keine echte Hardware**. Der Sensor ist simuliert — aber die Nebenläufigkeit ist echt:
-Der Messwert entsteht auf einem anderen Thread als dem, der die Oberfläche zeichnet. Genau an
-dieser Grenze liegt der interessante Teil.
-
-Das Projekt ist der praktische Teil eines Umstiegs von C# nach Java. Der Anspruch ist bewusst
-nicht „möglichst viele Features", sondern **jede Entscheidung im Code begründen können**. Ein
-kleines Projekt, das durchdacht ist, ist hier mehr wert als ein großes, das nur läuft.
-
-Vier Themen kommen dabei in ihrer natürlichen Reihenfolge zusammen: das Observer-Muster (Java hat
-kein `event`-Schlüsselwort — wer Ereignisse will, baut sie), Nebenläufigkeit, die Anbindung an
-eine UI mit eigenem Thread, und Testbarkeit.
+A simulated laboratory device written in Java: a CO₂ incubator that keeps cell cultures at a
+target temperature, reports its readings from a thread of its own, and is monitored by a JavaFX
+user interface.
 
 ---
 
-## Aufbau
+## What this is about
 
-Drei Pakete, Abhängigkeiten **nur nach unten**:
+There is **no real hardware**. The sensor is simulated — but the concurrency is real: readings are
+produced on a different thread than the one drawing the interface. That boundary is where the
+interesting part of this project lives.
+
+The project is the hands-on half of a move from C# to Java. The goal is deliberately not "as many
+features as possible" but **being able to justify every decision in the code**. A small project
+that is thought through is worth more here than a large one that merely runs.
+
+Four topics come together in their natural order: the observer pattern (Java has no `event`
+keyword — if you want events, you build them), concurrency, binding to a UI that owns its own
+thread, and testability.
+
+---
+
+## Structure
+
+Three packages, dependencies pointing **downwards only**:
 
 ```
-ui        JavaFX. Kennt device und events.
-          ↑ Thread-Grenze
-device    Inkubator + Sensor-Simulation. Kennt events, kennt die UI nicht.
-events    Observer-Baukasten. Kennt nichts.
+ui        JavaFX. Knows device and events.
+          ↑ thread boundary
+device    Incubator + sensor simulation. Knows events, never the UI.
+events    Observer toolkit. Knows nothing.
 ```
 
-`events` und `device` haben keine UI-Abhängigkeit. Deshalb laufen ihre Tests ohne laufendes
-Fenster, und deshalb wäre die Oberfläche austauschbar, ohne die Gerätelogik anzufassen.
+`events` and `device` carry no UI dependency. That is why their tests run without a window on
+screen, and why the interface could be replaced without touching the device logic.
 
 ---
 
-## Die fünf Etappen
+## The five stages
 
-| # | Etappe | Ergebnis | Stand |
+| # | Stage | Result | Status |
 |---|---|---|---|
-| 1 | **Gerüst** | Gradle-Projekt, das startet und testet | ✅ fertig |
-| 2 | **Observer-Baukasten** | Ereignisse zustellen und abbestellen, getestet | ✅ fertig |
-| 3 | **Gerät und Nebenläufigkeit** | Ein Inkubator, der aus einem eigenen Thread meldet | ⏳ als Nächstes |
-| 4 | **Oberfläche** | JavaFX-Fenster, das Messwerte anzeigt | ⬜ offen |
-| 5 | **Abrunden** | README, frischer Klon, Grenzen benannt | ⬜ offen |
+| 1 | **Scaffolding** | A Gradle project that builds, runs and tests | ✅ done |
+| 2 | **Observer toolkit** | Delivering and cancelling events, under test | ✅ done |
+| 3 | **Device and concurrency** | An incubator reporting from its own thread | ⏳ next |
+| 4 | **User interface** | A JavaFX window showing live readings | ⬜ open |
+| 5 | **Wrap-up** | README, clean clone, limits stated honestly | ⬜ open |
 
-**Etappe 1 — Gerüst.** Gradle mit Kotlin-DSL, Java-21-Toolchain, JavaFX und JUnit. Die drei Pakete
-und ein leeres Fenster, das sich sauber schließt.
+**Stage 1 — Scaffolding.** Gradle with the Kotlin DSL, a Java 21 toolchain, JavaFX and JUnit. The
+three packages, plus an empty window that closes cleanly.
 
-**Etappe 2 — Observer-Baukasten.** `Event`, `EventSupport` und `Subscription`. Der Code stammt aus
-einem Vorläuferprojekt und wurde **unverändert übernommen**, dann wurden Tests dagegen geschrieben,
-dann wurde repariert — in dieser Reihenfolge. Zwei echte Fehler kamen dabei ans Licht: Das
-Abmelden konnte fremde Abos beenden, und Fehler aus Listenern verschwanden ohne Stacktrace. Beide
-wurden erst als roter Test sichtbar gemacht und dann behoben.
+**Stage 2 — Observer toolkit.** `Event`, `EventSupport` and `Subscription`. The code came from an
+earlier project and was **adopted unchanged**; then tests were written against it; then it was
+repaired — in that order. Two real defects surfaced along the way: cancelling one subscription
+could cancel someone else's, and exceptions thrown by listeners vanished without a stack trace.
+Each was first made visible as a failing test, then fixed.
 
-**Etappe 3 — Gerät und Nebenläufigkeit.** Der `Incubator` mit Zieltemperatur und Toleranz, dazu
-eine Sensor-Simulation, die im Sekundentakt neue Messwerte erzeugt. Hier geht es um Atomarität
-statt bloßer Sichtbarkeit, um Sperren, die niemals fremden Code umschließen, und um einen
-Zeitgeber, der sich sauber beenden lässt.
+**Stage 3 — Device and concurrency.** The `Incubator` with its target temperature and tolerance,
+plus a sensor simulation producing a new reading every second. This stage is about atomicity
+rather than mere visibility, about locks that never enclose foreign code, and about a scheduler
+that can be shut down cleanly.
 
-**Etappe 4 — Oberfläche.** Ein JavaFX-Fenster mit Messwertanzeige, Sollwert-Eingabe und
-Start/Stopp. Jeder Zugriff aus dem Sensor-Thread läuft über `Platform.runLater(…)` — die Brücke
-zwischen den Threads ist der eigentliche Inhalt dieser Etappe.
+**Stage 4 — User interface.** A JavaFX window with a reading display, a target-temperature input
+and a start/stop control. Every access from the sensor thread goes through `Platform.runLater(…)`
+— that bridge between threads is what this stage is really about.
 
-**Etappe 5 — Abrunden.** README, ein frischer Klon, der ohne Nacharbeit baut und startet, und eine
-ehrliche Liste dessen, was bewusst offen blieb.
+**Stage 5 — Wrap-up.** README, a fresh clone that builds and runs with no extra steps, and an
+honest list of what was deliberately left open.
 
-Jede Etappe endet in einem vorzeigbaren Zustand. Was da ist, läuft; die Tests sind grün.
-
----
-
-## Technik
-
-Java 21 LTS · Gradle (Kotlin-DSL) · JavaFX 21 · JUnit
-
-**Keine Fremdbibliotheken** außer diesen. Alles andere würde den Eigenanteil verwischen.
-
-Ebenfalls bewusst außen vor: Netzwerk, Datenbank, Persistenz, Multi-Modul-Aufbau.
+Every stage ends in a presentable state. Whatever exists, runs; the tests are green.
 
 ---
 
-## Starten
+## Technology
+
+Java 21 LTS · Gradle (Kotlin DSL) · JavaFX 21 · JUnit
+
+**No third-party libraries** beyond these. Anything else would blur how much of this is my own work.
+
+Also deliberately out of scope: networking, databases, persistence, a multi-module layout.
+
+---
+
+## Running it
 
 ```
-gradlew test    # alle Tests
-gradlew run     # Anwendung starten
+gradlew test    # all tests
+gradlew run     # start the application
 ```
 
-`gradlew run` öffnet derzeit noch ein leeres Fenster — die Oberfläche entsteht in Etappe 4.
+`gradlew run` currently opens an empty window — the interface is built in stage 4.
 
 ---
 
-## Mehr Details
+## Further reading
 
-- **[`CLAUDE.md`](CLAUDE.md)** — warum das Projekt so geschnitten ist, welche Entscheidungen
-  getroffen wurden und was bewusst offen bleibt
-- **[`ENTWICKLUNGSPLAN.md`](ENTWICKLUNGSPLAN.md)** — was gebaut wird, in welcher Reihenfolge,
-  mit Anforderungen, Testlisten und den Protokollen über Abweichungen
+Both documents below are written in German.
+
+- **[`CLAUDE.md`](CLAUDE.md)** — why the project is cut the way it is, which decisions were made,
+  and what is knowingly left open
+- **[`ENTWICKLUNGSPLAN.md`](ENTWICKLUNGSPLAN.md)** — what gets built and in which order, with
+  requirements, test lists, and the logs recording every deviation
