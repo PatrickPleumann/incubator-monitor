@@ -88,15 +88,15 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **noch nicht begonnen** (31.08.2026). Die Liste zeigt den Stand der letzten
+Stand: **Etappe 1 abgeschlossen** (31.08.2026). Die Liste zeigt den Stand der letzten
 Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
-- [ ] 0.0 Git-Repository anlegen, `.gitignore` für Java/Gradle/IntelliJ
-- [ ] 1.1 Gradle-Projekt mit Kotlin-DSL und Java-21-Toolchain
-- [ ] 1.2 JavaFX einbinden
-- [ ] 1.3 JUnit 5 einbinden
-- [ ] 1.4 Paketstruktur und leeres Fenster
+- [x] 0.0 Git-Repository anlegen, `.gitignore` für Java/Gradle/IntelliJ
+- [x] 1.1 Gradle-Projekt mit Kotlin-DSL und Java-21-Toolchain
+- [x] 1.2 JavaFX einbinden
+- [x] 1.3 JUnit einbinden (6.0.0, siehe Änderungsprotokoll)
+- [x] 1.4 Paketstruktur und leeres Fenster
 
 **Etappe 2 — Observer-Baukasten**
 - [ ] 2.1 Code unverändert übernehmen
