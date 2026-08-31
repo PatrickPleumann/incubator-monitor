@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,8 +27,7 @@ class EventSupportTest
     }
 
     @Test
-    void fireSubscribedEventsInOrder()
-    {
+    void fireSubscribedEventsInOrder() {
         //Arrange
         EventSupport<String> support = new EventSupport<>();
         List<String> log = new ArrayList<>();
@@ -38,9 +38,50 @@ class EventSupportTest
 
         //Act
         support.fire("temperature changed");
+
         //Assert
-        assertEquals("1:temperature changed", log.get(0));
-        assertEquals("2:temperature changed", log.get(1));
-        assertEquals("3:temperature changed", log.get(2));
+        assertEquals(List.of("1:temperature changed", "2:temperature changed", "3:temperature changed"), log);
     }
+
+    @Test
+    void closedSubscriptionRecievesNoEvent()
+    {
+        //Arrange
+        EventSupport<String> support = new EventSupport<>();
+        List<String> log = new ArrayList<>();
+        Subscription temp = support.subscribe(value -> log.add("Test Value"));
+        temp.close();
+
+        //Act
+        support.fire("Test Value");
+
+        //Assert
+        //list.of("") is not an empty list - it holds one element and test fails correctly(!)
+        //but CAREFUL:  comparison view shows expected[] and actual[] result as the same empty array
+        assertEquals(List.of(), log);
+    }
+
+    @Test
+
+    void closeOnlyDeletesHandledSubscription()
+        {
+            //Arrange
+            EventSupport<String> support = new EventSupport<>();
+            List<String> log = new ArrayList<>();
+            Consumer<String> consumer = value -> log.add("Test");
+
+            Subscription first = support.subscribe(consumer);
+            Subscription second = support.subscribe(consumer);
+
+            first.close();
+            first.close();
+
+            //Act
+            support.fire("Test Fire");
+
+            //Assert
+            assertEquals(List.of("Test"), log);
+        }
+
+
 }
