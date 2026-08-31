@@ -88,7 +88,7 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **Etappe 1 abgeschlossen** (31.08.2026). Die Liste zeigt den Stand der letzten
+Stand: **Etappe 2 abgeschlossen** (01.09.2026). Die Liste zeigt den Stand der letzten
 Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
@@ -99,10 +99,10 @@ Standortbestimmung, nicht zwingend den Stand von jetzt.
 - [x] 1.4 Paketstruktur und leeres Fenster
 
 **Etappe 2 — Observer-Baukasten**
-- [ ] 2.1 Code unverändert übernehmen
-- [ ] 2.2 Spezifikation gelesen und offene Fragen geklärt
-- [ ] 2.3 Sieben Tests geschrieben, Test 4 und 5 rot gesehen
-- [ ] 2.4 Beide Befunde repariert, alle Tests grün
+- [x] 2.1 Code unverändert übernehmen
+- [x] 2.2 Spezifikation gelesen und offene Fragen geklärt
+- [x] 2.3 Sieben Tests geschrieben, Test 4 und 5 rot gesehen
+- [x] 2.4 Beide Befunde repariert, alle Tests grün
 
 **Etappe 3 — Gerät und Nebenläufigkeit**
 - [ ] 3.1 `TemperatureChangedEvent`
@@ -614,6 +614,7 @@ Bewusst nicht gelöst. Jeder Punkt hat einen Grund, und der Grund ist wichtiger 
 | **Kein Rückstau-Schutz** — ein langsamer Listener bremst den Sensor-Takt | Bei echter Hardware bräuchte es eine Entkopplung über eine Queue. Hier wäre das Aufwand ohne Erkenntnisgewinn. |
 | **Fehlerbehandlung in der Oberfläche** ist minimal | Der Kern ist abgesichert, die Oberfläche nicht. Bewusste Gewichtung. |
 | **Keine automatisierten UI-Tests** | Siehe Etappe 4. |
+| **Ein werfender Fehler-Handler** — wirft der Handler selbst eine Ausnahme, fliegt sie aus `fire()` heraus und die übrigen Listener gehen leer aus | Ein zweites `try` um den Handler herum würde die Frage nur verschieben: Was passiert, wenn *das* scheitert? Der Handler ist Code des Aufrufers, und ab einer Ebene muss man ihm vertrauen. Benannte Grenze statt stiller Annahme. |
 
 ---
 
@@ -641,3 +642,4 @@ umgehen ist der einzige Fehler, den man dabei machen kann.
 | 31.08.2026 | Aufgabe 3.3 ohne Typvorgabe neu gefasst, neue Anforderung M-4 | Der Schnitt der Simulation war vorgegeben. Damit hätte eine Entwurfsentscheidung im Projekt gestanden, die nicht vom Autor kommt — und die sich hinterher nicht begründen ließe. Jetzt gibt der Plan nur das Verhalten vor. |
 | 31.08.2026 | Fenstertitel auf „Incubator Monitor", Projektname `incubator-monitor` | Alles, was im Code oder als Bezeichner auftaucht, ist einheitlich englisch. Der deutsche Titel war die letzte Ausnahme und hätte im Fenster neben englischen Bezeichnern gestanden. Dieses Dokument bleibt deutsch. |
 | 31.08.2026 | JUnit 6.0.0 statt JUnit 5 (Aufgabe 1.3) | Der IntelliJ-Assistent hat die neue Hauptversion eingetragen. Für die hier benutzten Zusicherungen ist der Unterschied null — die Paketnamen `org.junit.jupiter.api.*` sind unverändert. Am Build zu drehen, nur damit eine Zahl zur Doku passt, wäre der schlechtere Tausch. Die Abweichung steht dafür hier. |
+| 01.09.2026 | Aufgabe 2.3 in zwei Hälften geteilt: erst Tests 1–4, 6, 7 und die Reparatur des `close()`-Befunds, dann Konstruktor mit Fehler-Handler, Test 5 und die Reparatur von `fire()` | Test 5 braucht den Konstruktor `EventSupport(Consumer<RuntimeException>)`, den es im übernommenen Code nicht gab. Als ein Block geschrieben hätte er nicht kompiliert — und ein Übersetzungsfehler hält den ganzen Testlauf an, sodass auch der echte rote Test 4 nicht mehr sichtbar gewesen wäre. So wurde jeder der beiden Befunde einzeln rot gesehen. |

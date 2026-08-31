@@ -2,6 +2,7 @@ package io.github.patrickpleumann.incubator.events;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import javax.print.attribute.standard.NumberUp;
 
 class EventSupportTest
 {
@@ -19,14 +19,14 @@ class EventSupportTest
     {
         //arrange
         EventSupport<String> support = new EventSupport<>();
-        AtomicReference<String> recieved = new AtomicReference<>();
-        support.subscribe(value -> recieved.set(value));
+        AtomicReference<String> received = new AtomicReference<>();
+        support.subscribe(value -> received.set(value));
 
         //act
         support.fire("temperature changed");
 
         //assert
-        assertEquals("temperature changed", recieved.get());
+        assertEquals("temperature changed", received.get());
     }
 
     @Test
@@ -47,7 +47,7 @@ class EventSupportTest
     }
 
     @Test
-    void closedSubscriptionRecievesNoEvent()
+    void closedSubscriptionReceivesNoEvent()
     {
         //Arrange
         EventSupport<String> support = new EventSupport<>();
@@ -94,7 +94,7 @@ class EventSupportTest
     }
 
     @Test
-    void subscriptionIsClosedWhenTryBlockExists()
+    void subscriptionIsClosedWhenTryBlockExits()
     {
         //Arrange
         EventSupport<String> support = new EventSupport<>();
@@ -109,5 +109,23 @@ class EventSupportTest
 
         //Assert
         assertEquals(List.of("Test"), log);
+    }
+
+    @Test
+    void throwingListenerIsReportedAndDeliveryContinues()
+    {
+        //Arrange
+        List<String> log = new ArrayList<>();
+        AtomicReference<RuntimeException> atomicReference = new AtomicReference<>();
+        EventSupport<String> support = new EventSupport<>(value -> atomicReference.set(value));
+        support.subscribe(value -> { throw new RuntimeException("Booooom"); });
+        support.subscribe(value -> log.add("Not Boom"));
+
+        //Act
+        support.fire("Maybe Boom?");
+
+        //Assert
+        assertNotNull(atomicReference.get());
+        assertEquals(List.of("Not Boom"), log);
     }
 }
