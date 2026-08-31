@@ -1,6 +1,7 @@
 package io.github.patrickpleumann.incubator.events;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+
+import javax.print.attribute.standard.NumberUp;
 
 class EventSupportTest
 {
@@ -62,7 +65,6 @@ class EventSupportTest
     }
 
     @Test
-
     void closeOnlyDeletesHandledSubscription()
         {
             //Arrange
@@ -83,5 +85,29 @@ class EventSupportTest
             assertEquals(List.of("Test"), log);
         }
 
+    @Test
+    void subscribeRejectsNull()
+    {
+        EventSupport<String> support = new EventSupport<>();
 
+        assertThrows(NullPointerException.class, () -> support.subscribe(null));
+    }
+
+    @Test
+    void subscriptionIsClosedWhenTryBlockExists()
+    {
+        //Arrange
+        EventSupport<String> support = new EventSupport<>();
+        List<String> log = new ArrayList<>();
+
+        //Act
+        try(Subscription currentSub = support.subscribe(value -> log.add("Test")))
+        {
+            support.fire("Test");
+        }
+        support.fire("Test");
+
+        //Assert
+        assertEquals(List.of("Test"), log);
+    }
 }
