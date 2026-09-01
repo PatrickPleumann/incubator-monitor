@@ -101,6 +101,14 @@ erklärbar sein — nicht nur funktionieren.
 - `fire()` wird **außerhalb** eines Sperrbereichs aufgerufen — fremder Listener-Code darf niemals
   unter einer eigenen Sperre laufen.
 - `ScheduledExecutorService` statt `new Thread()`: sauber startbar und vor allem sauber beendbar.
+- Ein Schloss nützt nur, wenn **alle** Zugriffe dasselbe benutzen — die lesenden ebenso wie die
+  schreibenden. Ein eigenes privates `Object` als Schloss statt `this`, damit von außen niemand
+  mitsperren kann.
+- Ein Test kann eine Wettlaufsituation **nicht widerlegen**. Gemessen am ungesicherten Code trat
+  sie in etwa 1 von 200 Durchläufen auf; ein grüner Testlauf beweist also nichts. Solche Tests
+  sind Wächter gegen späteres Entfernen der Absicherung, die Sicherheit selbst kommt aus der
+  Begründung. Die Ausnahme ist ein Test, der auf eine **Blockade** zielt: Der schlägt zuverlässig
+  fehl, weil er auf ein Zeitlimit läuft statt auf einen Zufall.
 
 **Ressourcen und Lebensdauer**
 - `Subscription` ist dasselbe Muster wie RAII in C++ und `IDisposable` in C#. Der Unterschied:

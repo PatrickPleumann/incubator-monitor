@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -92,7 +94,7 @@ public class IncubatorTest
         AtomicInteger counter = new AtomicInteger(0);
         List<Thread> threadList = new ArrayList<>();
         incubator.temperatureChanged().subscribe(value -> counter.incrementAndGet());
-        CountDownLatch startSignal = new CountDownLatch(1);
+        CountDownLatch scountReturned = new CountDownLatch(1);
 
         //Act
         for (int i = 0; i < 8; i++)
@@ -102,7 +104,7 @@ public class IncubatorTest
             {
                 try
                 {
-                    startSignal.await();
+                    scountReturned.await();
                 }
                 catch (InterruptedException ex)
                 {
@@ -114,7 +116,7 @@ public class IncubatorTest
             threadList.add(currentThread);
             currentThread.start();
         }
-        startSignal.countDown();
+        scountReturned.countDown();
 
         for (int i = 0; i < threadList.size(); i++)
         {
@@ -123,5 +125,40 @@ public class IncubatorTest
 
         //Assert
         assertEquals(1, counter.get());
+    }
+
+    @Test
+    void fireRunsOutsideTheLock() throws Exception
+    {
+        //arrange
+        Incubator incubator = new Incubator(37.0, 0.5);
+        CountDownLatch scoutReturned = new CountDownLatch(1);
+        AtomicBoolean scoutGotThrough = new AtomicBoolean();
+
+        incubator.temperatureChanged().subscribe(value ->
+        {
+            var thread = new Thread(() ->
+            {
+                incubator.getCurrentTemperature();
+                scoutReturned.countDown();
+
+            });
+            thread.start();
+
+            try
+            {
+                scoutGotThrough.set(scoutReturned.await(1,TimeUnit.SECONDS));
+            }
+            catch (InterruptedException ex)
+            {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        //act
+        incubator.updateTemperature(38.0);
+
+        //assert
+        assertTrue(scoutGotThrough.get());
     }
 }
