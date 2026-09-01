@@ -45,7 +45,6 @@ class EventSupportTest
         //Assert
         assertEquals(List.of("1:temperature changed", "2:temperature changed", "3:temperature changed"), log);
     }
-
     @Test
     void closedSubscriptionReceivesNoEvent()
     {
@@ -54,6 +53,7 @@ class EventSupportTest
         List<String> log = new ArrayList<>();
         Subscription temp = support.subscribe(value -> log.add("Test Value"));
         temp.close();
+
 
         //Act
         support.fire("Test Value");

@@ -19,7 +19,8 @@ public class EventSupport<T> implements  Event<T>
 
 
     @Override
-    public Subscription subscribe(Consumer<? super T> listener) {
+    public Subscription subscribe(Consumer<? super T> listener)
+    {
         Objects.requireNonNull(listener);
         var currentRegistration = new Registration(listener);
         listeners.add(currentRegistration);
@@ -45,7 +46,8 @@ public class EventSupport<T> implements  Event<T>
     {
         private final Consumer<? super T> consumer;
 
-        private Registration(Consumer<? super T> consumer) {
+        private Registration(Consumer<? super T> consumer)
+        {
             this.consumer = consumer;
         }
 

@@ -8,6 +8,7 @@ public class Incubator
     private final double toleranceCelsius;
     private double targetCelsius;
     private double measuredCelsius;
+    private final Object threadLock = new Object();
     private static final double MINIMUM_CHANGE_CELSIUS = 0.001;
     private final EventSupport<TemperatureChangedEvent> eventSupport = new EventSupport<>();
     public Incubator(double targetCelsius, double toleranceCelsius)
@@ -19,6 +20,7 @@ public class Incubator
         this.toleranceCelsius = toleranceCelsius;
         this.targetCelsius = targetCelsius;
         this.measuredCelsius = targetCelsius;
+
     }
 
     public Event<TemperatureChangedEvent> temperatureChanged()
@@ -28,33 +30,48 @@ public class Incubator
 
     public double getCurrentTemperature()
     {
-        return measuredCelsius;
+        synchronized (threadLock)
+        {
+            return measuredCelsius;
+        }
     }
 
     public double getTargetTemperature()
     {
-       return targetCelsius;
+        synchronized (threadLock)
+        {
+            return targetCelsius;
+        }
     }
 
     public void setTargetTemperature(double celsius)
     {
         requireValidTargetTemperature(celsius);
-        targetCelsius = celsius;
+        synchronized (threadLock)
+        {
+            targetCelsius = celsius;
+        }
     }
 
     public void updateTemperature(double celsius)
     {
-        if(Math.abs(celsius - measuredCelsius) > MINIMUM_CHANGE_CELSIUS)
+        TemperatureChangedEvent event;
+        synchronized (threadLock)
         {
+            if(Math.abs(celsius - measuredCelsius) <= MINIMUM_CHANGE_CELSIUS) { return; }
             var previousCelsius = measuredCelsius;
             measuredCelsius = celsius;
-            eventSupport.fire(new TemperatureChangedEvent(previousCelsius, measuredCelsius));
+            event = new TemperatureChangedEvent(previousCelsius, measuredCelsius);
         }
+        eventSupport.fire(event);
     }
 
     public boolean isWithinTolerance()
     {
-        return Math.abs(measuredCelsius - targetCelsius) <= toleranceCelsius;
+        synchronized (threadLock)
+        {
+            return Math.abs(measuredCelsius - targetCelsius) <= toleranceCelsius;
+        }
     }
 
     private static void requireValidTargetTemperature(double value)
