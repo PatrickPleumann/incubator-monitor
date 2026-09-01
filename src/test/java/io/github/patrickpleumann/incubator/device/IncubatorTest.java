@@ -2,6 +2,9 @@ package io.github.patrickpleumann.incubator.device;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -63,9 +66,62 @@ public class IncubatorTest
     }
 
     @Test
-    void NewTest()
+    void updateTemperatureDoesNotFireBelowThreshold()
     {
+        //arrange
+        final double changeBelowThreshold = 0.001;
         Incubator incubator = new Incubator(37.0, 0.5);
-        AtomicInteger counter = new AtomicInteger();
+        AtomicInteger counter = new AtomicInteger(0);
+        incubator.temperatureChanged().subscribe(value -> counter.incrementAndGet());
+
+        //act
+        incubator.updateTemperature(37.0);
+        incubator.updateTemperature(37.0);
+        incubator.updateTemperature(37.0 + changeBelowThreshold);
+
+        //assert
+        assertEquals(0, counter.get());
+    }
+
+
+    @Test
+    void newTestForMultithreading() throws Exception
+    {
+        //Arrange
+        Incubator incubator = new Incubator(37.0, 0.5);
+        AtomicInteger counter = new AtomicInteger(0);
+        List<Thread> threadList = new ArrayList<>();
+        incubator.temperatureChanged().subscribe(value -> counter.incrementAndGet());
+        CountDownLatch startSignal = new CountDownLatch(1);
+
+        //Act
+        for (int i = 0; i < 8; i++)
+        {
+
+            var currentThread = new Thread(() ->
+            {
+                try
+                {
+                    startSignal.await();
+                }
+                catch (InterruptedException ex)
+                {
+                    throw new RuntimeException(ex);
+                }
+
+                incubator.updateTemperature(38.0);
+            });
+            threadList.add(currentThread);
+            currentThread.start();
+        }
+        startSignal.countDown();
+
+        for (int i = 0; i < threadList.size(); i++)
+        {
+            threadList.get(i).join();
+        }
+
+        //Assert
+        assertEquals(1, counter.get());
     }
 }

@@ -8,6 +8,7 @@ public class Incubator
     private final double toleranceCelsius;
     private double targetCelsius;
     private double measuredCelsius;
+    private static final double MINIMUM_CHANGE_CELSIUS = 0.001;
     private final EventSupport<TemperatureChangedEvent> eventSupport = new EventSupport<>();
     public Incubator(double targetCelsius, double toleranceCelsius)
     {
@@ -43,9 +44,12 @@ public class Incubator
 
     public void updateTemperature(double celsius)
     {
-        var previousCelsius = measuredCelsius;
-        measuredCelsius = celsius;
-        eventSupport.fire(new TemperatureChangedEvent(previousCelsius, measuredCelsius));
+        if(Math.abs(celsius - measuredCelsius) > MINIMUM_CHANGE_CELSIUS)
+        {
+            var previousCelsius = measuredCelsius;
+            measuredCelsius = celsius;
+            eventSupport.fire(new TemperatureChangedEvent(previousCelsius, measuredCelsius));
+        }
     }
 
     public boolean isWithinTolerance()
