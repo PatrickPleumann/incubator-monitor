@@ -88,8 +88,8 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **Etappe 2 abgeschlossen** (01.09.2026). Die Liste zeigt den Stand der letzten
-Standortbestimmung, nicht zwingend den Stand von jetzt.
+Stand: **Etappe 3 begonnen, Aufgabe 3.2 zur Hälfte** (01.09.2026). Die Liste zeigt den Stand der
+letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
 - [x] 0.0 Git-Repository anlegen, `.gitignore` für Java/Gradle/IntelliJ
@@ -105,10 +105,10 @@ Standortbestimmung, nicht zwingend den Stand von jetzt.
 - [x] 2.4 Beide Befunde repariert, alle Tests grün
 
 **Etappe 3 — Gerät und Nebenläufigkeit**
-- [ ] 3.1 `TemperatureChangedEvent`
-- [ ] 3.2 `Incubator` (I-1 bis I-8)
+- [x] 3.1 `TemperatureChangedEvent`
+- [ ] 3.2 `Incubator` — I-1 bis I-5 und I-9 stehen, offen sind I-6, I-7, I-8
 - [ ] 3.3 Sensor-Simulation (M-1 bis M-4, SI-1 bis SI-7) — Schnitt selbst entscheiden
-- [ ] 3.4 Zehn Tests, darunter Test 5 (Sperrbereich) und 6 (mehrere Threads)
+- [ ] 3.4 Zehn Tests — 1 bis 4 geschrieben, Test 6 als Gerüst vorhanden; offen sind 5 und 7 bis 10
 
 **Etappe 4 — Oberfläche**
 - [ ] 4.1 Aufbau (U-1 bis U-6)
@@ -648,3 +648,4 @@ umgehen ist der einzige Fehler, den man dabei machen kann.
 | 01.09.2026 | README zweisprachig: `README.md` englisch, `README.de.md` deutsch | Das Repository ist öffentlich, und GitHubs Publikum ist international. Englisch auf der Startseite erreicht mehr Leser; die deutsche Fassung bleibt vollständig erhalten und ist oben verlinkt. Die beiden Arbeitsdokumente bleiben deutsch — sie richten sich an den Autor, nicht an Besucher. |
 | 01.09.2026 | Aufgabenliste zu 3.3: Typnamen durch die Anforderungs-IDs ersetzt | Die Zeile nannte weiterhin `TemperatureModel`, `DriftingTemperatureModel` und `SensorSimulation` — also genau die Typvorgabe, die am 31.08.2026 aus Aufgabe 3.3 bewusst entfernt wurde. Damit stand die Antwort auf die einzige offen gelassene Entwurfsentscheidung des Projekts in der Übersicht. Die Änderung von damals war nur unvollständig nachgezogen. |
 | 01.09.2026 | Anforderung I-9 ergänzt: Der Messwert startet auf dem Sollwert | Der Konstruktor nimmt Sollwert und Toleranz, aber die Spezifikation sagte nicht, welchen Messwert das Gerät vorher hat. Ohne Festlegung hängt Test 2 (alter und neuer Wert im Ereignis) an einer stillen Annahme. `0.0` als Vorgabewert wäre der schlechtere Wert: Das Gerät stünde nach dem Start außerhalb der Toleranz und Aufgabe 4.3 verlangt ausdrücklich einen sinnvollen Anfangswert ohne Platzhalter. |
+| 01.09.2026 | Test 6 (mehrere Threads) als **Wächter** statt als Nachweis beschrieben | Gemessen mit dem unabgesicherten `updateTemperature`: Bei 32 Threads trat der Fehler in 1 von 500 Runden auf, bei 200 Threads in 1 von 200 (schlimmstenfalls drei Ereignisse statt einem). Ein einzelner Durchlauf des Tests erwischt die Wettlaufsituation also praktisch nie — das Zeitfenster zwischen Lesen und Schreiben ist nur wenige Maschinenbefehle breit. Der Test hält damit die Anforderung fest und schlägt an, wenn die Absicherung später entfernt wird; ein Beweis für Korrektheit ist er nicht. Bei Nebenläufigkeit kommt die Sicherheit aus der Begründung, nicht aus dem grünen Balken. Der Schritt „erst rot sehen" wurde stattdessen einmalig über eine Messreihe erbracht (500 bzw. 200 Runden), die nicht im Repository bleibt. |
