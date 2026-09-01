@@ -107,7 +107,7 @@ Standortbestimmung, nicht zwingend den Stand von jetzt.
 **Etappe 3 — Gerät und Nebenläufigkeit**
 - [ ] 3.1 `TemperatureChangedEvent`
 - [ ] 3.2 `Incubator` (I-1 bis I-8)
-- [ ] 3.3 `TemperatureModel`, `DriftingTemperatureModel`, `SensorSimulation`
+- [ ] 3.3 Sensor-Simulation (M-1 bis M-4, SI-1 bis SI-7) — Schnitt selbst entscheiden
 - [ ] 3.4 Zehn Tests, darunter Test 5 (Sperrbereich) und 6 (mehrere Threads)
 
 **Etappe 4 — Oberfläche**
@@ -416,6 +416,7 @@ public class Incubator {
 | I-6 | Alle Lesemethoden sind aus jedem Thread aufrufbar und liefern nie einen halb geschriebenen Zustand. |
 | I-7 | Das Prüfen-und-Setzen in `updateTemperature` ist **atomar**: Zwei gleichzeitige Aufrufe dürfen nicht beide „unverändert" sehen und beide schreiben. |
 | I-8 | `fire()` wird **außerhalb** jedes Sperrbereichs aufgerufen. |
+| I-9 | Der Messwert startet auf dem Sollwert. Direkt nach dem Konstruktor gilt also `getCurrentTemperature() == getTargetTemperature()` und `isWithinTolerance() == true`. |
 
 **Tipps**
 1. Zu I-6 vs. I-7: `volatile` sichert **Sichtbarkeit** — ein Schreibvorgang wird von anderen
@@ -645,3 +646,5 @@ umgehen ist der einzige Fehler, den man dabei machen kann.
 | 01.09.2026 | Aufgabe 2.3 in zwei Hälften geteilt: erst Tests 1–4, 6, 7 und die Reparatur des `close()`-Befunds, dann Konstruktor mit Fehler-Handler, Test 5 und die Reparatur von `fire()` | Test 5 braucht den Konstruktor `EventSupport(Consumer<RuntimeException>)`, den es im übernommenen Code nicht gab. Als ein Block geschrieben hätte er nicht kompiliert — und ein Übersetzungsfehler hält den ganzen Testlauf an, sodass auch der echte rote Test 4 nicht mehr sichtbar gewesen wäre. So wurde jeder der beiden Befunde einzeln rot gesehen. |
 | 01.09.2026 | README bereits jetzt angelegt statt erst in Aufgabe 5.1 | Das Repository ist öffentlich, und auf der Startseite rendert GitHub ausschließlich `README.md` — ohne sie sieht ein Besucher eine nackte Dateiliste. Aufgabe 5.1 wird dadurch zu „README überarbeiten": Die vier geforderten Abschnitte werden am Ende gegengeprüft und um das ergänzt, was erst dann feststeht (Screenshot, endgültige offene Punkte). |
 | 01.09.2026 | README zweisprachig: `README.md` englisch, `README.de.md` deutsch | Das Repository ist öffentlich, und GitHubs Publikum ist international. Englisch auf der Startseite erreicht mehr Leser; die deutsche Fassung bleibt vollständig erhalten und ist oben verlinkt. Die beiden Arbeitsdokumente bleiben deutsch — sie richten sich an den Autor, nicht an Besucher. |
+| 01.09.2026 | Aufgabenliste zu 3.3: Typnamen durch die Anforderungs-IDs ersetzt | Die Zeile nannte weiterhin `TemperatureModel`, `DriftingTemperatureModel` und `SensorSimulation` — also genau die Typvorgabe, die am 31.08.2026 aus Aufgabe 3.3 bewusst entfernt wurde. Damit stand die Antwort auf die einzige offen gelassene Entwurfsentscheidung des Projekts in der Übersicht. Die Änderung von damals war nur unvollständig nachgezogen. |
+| 01.09.2026 | Anforderung I-9 ergänzt: Der Messwert startet auf dem Sollwert | Der Konstruktor nimmt Sollwert und Toleranz, aber die Spezifikation sagte nicht, welchen Messwert das Gerät vorher hat. Ohne Festlegung hängt Test 2 (alter und neuer Wert im Ereignis) an einer stillen Annahme. `0.0` als Vorgabewert wäre der schlechtere Wert: Das Gerät stünde nach dem Start außerhalb der Toleranz und Aufgabe 4.3 verlangt ausdrücklich einen sinnvollen Anfangswert ohne Platzhalter. |
