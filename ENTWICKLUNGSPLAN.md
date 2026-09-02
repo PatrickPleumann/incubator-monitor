@@ -88,7 +88,7 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **Etappe 3 bis einschließlich Aufgabe 3.2 fertig** (02.09.2026). Die Liste zeigt den Stand
+Stand: **Etappe 3 — Werteerzeugung fertig, Taktgeber offen** (02.09.2026). Die Liste zeigt den Stand
 der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
@@ -107,8 +107,8 @@ der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 **Etappe 3 — Gerät und Nebenläufigkeit**
 - [x] 3.1 `TemperatureChangedEvent`
 - [x] 3.2 `Incubator` — I-1 bis I-9, abgesichert über ein privates Schloss, `fire` außerhalb
-- [ ] 3.3 Sensor-Simulation (M-1 bis M-4, SI-1 bis SI-7) — Schnitt selbst entscheiden
-- [ ] 3.4 Zehn Tests — 1 bis 6 geschrieben und grün; offen sind 7 bis 10 (gehören zu 3.3)
+- [~] 3.3 Sensor-Simulation — Werteerzeugung fertig (M-1 bis M-4): `TemperatureSource` als Naht, `SimulatedTemperatureSource` als Rechenmodell. Offen: der Taktgeber (SI-1 bis SI-7)
+- [~] 3.4 Tests — 1 bis 8 grün, dazu ein zusätzlicher Test für M-1 (siehe Änderungsprotokoll); offen sind 9 und 10 (gehören zum Taktgeber)
 
 **Etappe 4 — Oberfläche**
 - [ ] 4.1 Aufbau (U-1 bis U-6)
@@ -651,3 +651,4 @@ umgehen ist der einzige Fehler, den man dabei machen kann.
 | 01.09.2026 | Test 6 (mehrere Threads) als **Wächter** statt als Nachweis beschrieben | Gemessen mit dem unabgesicherten `updateTemperature`: Bei 32 Threads trat der Fehler in 1 von 500 Runden auf, bei 200 Threads in 1 von 200 (schlimmstenfalls drei Ereignisse statt einem). Ein einzelner Durchlauf des Tests erwischt die Wettlaufsituation also praktisch nie — das Zeitfenster zwischen Lesen und Schreiben ist nur wenige Maschinenbefehle breit. Der Test hält damit die Anforderung fest und schlägt an, wenn die Absicherung später entfernt wird; ein Beweis für Korrektheit ist er nicht. Bei Nebenläufigkeit kommt die Sicherheit aus der Begründung, nicht aus dem grünen Balken. Der Schritt „erst rot sehen" wurde stattdessen einmalig über eine Messreihe erbracht (500 bzw. 200 Runden), die nicht im Repository bleibt. |
 | 02.09.2026 | Test 5 (Sperrbereich) nachträglich rot gesehen, statt vor der Implementierung | Die Absicherung von `updateTemperature` entstand aus der Anforderung heraus, der Test kam danach — die Reihenfolge „erst rot" war damit nicht mehr möglich. Ersatzweise wurde `fire` einmal absichtlich in den Sperrbereich verschoben: Der Test schlug zuverlässig fehl und brauchte dabei die volle Wartezeit von einer Sekunde. Anders als Test 6 ist Test 5 damit ein echter Nachweis und nicht nur ein Wächter. Die Änderung wurde sofort zurückgenommen. |
 | 02.09.2026 | Aufbau von Test 5 festgelegt: Listener startet einen zweiten Thread und wartet auf dessen Lebenszeichen | Der Plan schlug `assertTimeoutPreemptively` vor. Das allein hätte nichts bewiesen: Schlösser in Java sind wiedereintrittsfähig, derselbe Thread käme auch unter der eigenen Sperre durch `getCurrentTemperature`. Ein Verklemmen entsteht erst mit einem zweiten Thread. Der Listener startet deshalb einen Kundschafter und wartet mit `CountDownLatch.await(1, SECONDS)` auf dessen Rückmeldung; der Test hängt dadurch nie, sondern meldet sich nach einer Sekunde selbst. |
+| 02.09.2026 | Testliste zu 3.4 um einen Test für M-1 erweitert: „von 20 °C aus liegt der Wert nach 20 Schritten am Sollwert" | Der Gegencheck an Test 8 schlug fehl: Mit `PULL_FACTOR = 0`, also ganz ohne Rückholkraft zum Sollwert, blieb Test 8 **grün**. Grund ist die Wurzel-Abhängigkeit einer Zufallsbewegung — bei Schritten von höchstens ±0,2 °C entfernt sich der Wert über 1000 Schritte nur um rund 3,6 °C und bleibt damit im 5-°C-Band. Test 8 bewacht also das Band (M-3), nicht die Rückholkraft; für M-1 hatte die Liste überhaupt keinen Test. Der neue Test wird mit `PULL_FACTOR = 0` zuverlässig rot, weil der Abstand dann bei rund 17 °C stehen bleibt. Test 8 bleibt erhalten, aber nicht mehr als Nachweis für M-1. |
