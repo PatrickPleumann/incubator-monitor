@@ -527,6 +527,23 @@ eine schriftliche Abnahmeliste, die reproduzierbar ist.
 | U-5 | Ungültige Eingabe (leer, Buchstaben, außerhalb des Bereichs) markiert das Feld und ändert nichts. **Kein** Absturz, **keine** Ausnahme in der Konsole. |
 | U-6 | Schaltfläche Start/Stopp für die Simulation. |
 
+**Farben**
+
+Hauptfarben der Oberfläche:
+
+| Rolle | RGB | Hex | JavaFX |
+|---|---|---|---|
+| Grundton | 255, 125, 0 | `#FF7D00` | `Color.web("#FF7D00")` |
+| Akzent | 60, 17, 146 | `#3C1192` | `Color.web("#3C1192")` |
+
+Die Statusfarben aus U-3 (grün, bernstein) bleiben davon unberührt — sie tragen eine Bedeutung
+und werden nicht mit der Gestaltung vermischt. Bernstein liegt nah am Grundton; wo der Status
+spricht, tritt der Grundton zurück.
+
+Zur Lesbarkeit: Auf dem Grundton trägt **dunkle** Schrift — Weiß hat auf diesem Orange zu wenig
+Kontrast. Der Akzent ist dunkel genug für weiße Schrift und eignet sich für Kopfzeile, Rahmen
+und Schaltflächen.
+
 **Tipp**
 1. `BorderPane` entspricht dem `DockPanel` aus WPF, `VBox` dem `StackPanel` mit vertikaler
    Ausrichtung. Die Layout-Logik überträgt sich; nur die Namen sind andere.
