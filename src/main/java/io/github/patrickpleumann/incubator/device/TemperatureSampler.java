@@ -3,7 +3,7 @@ package io.github.patrickpleumann.incubator.device;
 import java.time.Duration;
 import java.util.Objects;
 
-public class TemperatureSampler implements AutoCloseable
+public final class TemperatureSampler implements AutoCloseable
 {
     private final Incubator incubator;
     private final TemperatureSource source;
