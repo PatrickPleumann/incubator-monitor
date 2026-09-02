@@ -77,6 +77,33 @@ Every stage ends in a presentable state. Whatever exists, runs; the tests are gr
 
 ---
 
+## One design decision: a model, not a sensor
+
+Readings come from a replaceable type behind an interface. Its method reads
+
+```java
+double nextTemperature(double currentCelsius, double targetCelsius);
+```
+
+It **computes** the next value rather than reading one, and it remembers nothing — together that
+makes it testable with no scheduler and no thread involved. The seam is therefore a **model of
+temperature behaviour**, not a sensor: what can be swapped are different curves (calm, sluggish,
+noisy), not real hardware.
+
+That is deliberate. An interface with room for real hardware behind it would have to carry four
+more things: a method without arguments (a sensor reads, it does not compute), an answer to read
+failures (a checked exception or `OptionalDouble`), a lifetime (`AutoCloseable`, since a
+connection is opened and must be closed) — and possibly the opposite direction altogether, because
+real sensors tend to report on their own rather than being polled. None of that would buy anything
+here: arithmetic does not fail, and what sits behind the interface is a random-walk formula.
+
+What settled it is that the decision stays **reversible**. The interface has exactly one user —
+the type that holds the clock. Moving to real sensing later touches one class and adds a second
+one next to it. Abstractions do not get expensive by being introduced late; they get expensive
+when they have to be cut back out of ten places.
+
+---
+
 ## Technology
 
 Java 21 LTS · Gradle (Kotlin DSL) · JavaFX 21 · JUnit

@@ -77,6 +77,33 @@ Jede Etappe endet in einem vorzeigbaren Zustand. Was da ist, läuft; die Tests s
 
 ---
 
+## Eine Entwurfsentscheidung: Rechenmodell statt Sensor
+
+Die Messwerte kommen aus einem austauschbaren Typ hinter einem Interface. Dessen Methode lautet
+
+```java
+double nextTemperature(double currentCelsius, double targetCelsius);
+```
+
+Sie **rechnet** den nächsten Wert aus, statt ihn abzulesen, und merkt sich dabei nichts — beides
+zusammen macht sie ohne Zeitgeber und ohne Thread prüfbar. Die Naht ist damit ein
+**Rechenmodell**, kein Sensor: Austauschbar sind verschiedene Verläufe (ruhig, träge, gestört),
+nicht echte Hardware.
+
+Das ist bewusst so. Ein Interface, hinter das echte Hardware passt, müsste vier Dinge mehr tragen:
+eine Methode ohne Argumente (ein Sensor liest ab, statt zu rechnen), eine Antwort auf Lesefehler
+(geprüfte Ausnahme oder `OptionalDouble`), eine Lebensdauer (`AutoCloseable`, weil eine Verbindung
+geöffnet und geschlossen werden muss) — und womöglich die umgekehrte Richtung, weil echte Sensoren
+sich oft von selbst melden, statt abgefragt zu werden. Nichts davon hätte hier einen Gegenwert:
+Rechnen schlägt nicht fehl, und hinter dem Interface steckt eine Zufallsformel.
+
+Ausschlaggebend war, dass die Entscheidung **umkehrbar bleibt**. Das Interface hat genau einen
+Benutzer — den Typ, der den Takt hält. Ein späterer Wechsel auf echte Sensorik fasst eine Klasse
+an und stellt eine zweite daneben. Abstraktionen werden nicht dadurch teuer, dass man sie zu spät
+einführt, sondern dadurch, dass man sie an zehn Stellen wieder herausoperieren muss.
+
+---
+
 ## Technik
 
 Java 21 LTS · Gradle (Kotlin-DSL) · JavaFX 21 · JUnit
