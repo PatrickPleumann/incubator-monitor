@@ -2,7 +2,7 @@
 
 **English** · [Deutsch](README.de.md)
 
-> **Status: stage 2 of 5 complete** — 2026-09-01
+> **Status: stage 3 of 5 complete** — 2026-09-03
 
 A simulated laboratory device written in Java: a CO₂ incubator that keeps cell cultures at a
 target temperature, reports its readings from a thread of its own, and is monitored by a JavaFX
@@ -48,8 +48,8 @@ screen, and why the interface could be replaced without touching the device logi
 |---|---|---|---|
 | 1 | **Scaffolding** | A Gradle project that builds, runs and tests | ✅ done |
 | 2 | **Observer toolkit** | Delivering and cancelling events, under test | ✅ done |
-| 3 | **Device and concurrency** | An incubator reporting from its own thread | ⏳ next |
-| 4 | **User interface** | A JavaFX window showing live readings | ⬜ open |
+| 3 | **Device and concurrency** | An incubator reporting from its own thread | ✅ done |
+| 4 | **User interface** | A JavaFX window showing live readings | ⏳ next |
 | 5 | **Wrap-up** | README, clean clone, limits stated honestly | ⬜ open |
 
 **Stage 1 — Scaffolding.** Gradle with the Kotlin DSL, a Java 21 toolchain, JavaFX and JUnit. The

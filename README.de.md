@@ -2,7 +2,7 @@
 
 [English](README.md) · **Deutsch**
 
-> **Stand: Etappe 2 von 5 abgeschlossen** — 01.09.2026
+> **Stand: Etappe 3 von 5 abgeschlossen** — 03.09.2026
 
 Ein simuliertes Laborgerät in Java: ein CO₂-Inkubator, der Zellkulturen auf einer Zieltemperatur
 hält, seine Messwerte aus einem eigenen Thread meldet und von einer JavaFX-Oberfläche überwacht
@@ -48,8 +48,8 @@ Fenster, und deshalb wäre die Oberfläche austauschbar, ohne die Gerätelogik a
 |---|---|---|---|
 | 1 | **Gerüst** | Gradle-Projekt, das startet und testet | ✅ fertig |
 | 2 | **Observer-Baukasten** | Ereignisse zustellen und abbestellen, getestet | ✅ fertig |
-| 3 | **Gerät und Nebenläufigkeit** | Ein Inkubator, der aus einem eigenen Thread meldet | ⏳ als Nächstes |
-| 4 | **Oberfläche** | JavaFX-Fenster, das Messwerte anzeigt | ⬜ offen |
+| 3 | **Gerät und Nebenläufigkeit** | Ein Inkubator, der aus einem eigenen Thread meldet | ✅ fertig |
+| 4 | **Oberfläche** | JavaFX-Fenster, das Messwerte anzeigt | ⏳ als Nächstes |
 | 5 | **Abrunden** | README, frischer Klon, Grenzen benannt | ⬜ offen |
 
 **Etappe 1 — Gerüst.** Gradle mit Kotlin-DSL, Java-21-Toolchain, JavaFX und JUnit. Die drei Pakete

@@ -79,6 +79,8 @@ Diese sind getroffen und werden nicht ohne Anlass neu aufgerollt:
 | **Oberfläche in Java-Code, kein FXML** | Ein Werkzeug weniger, das schiefgehen kann. FXML bringt für diesen Umfang keinen Vorteil. |
 | **Keine Fremdbibliotheken** | Nur JDK, JavaFX, JUnit. Alles andere verwischt den Eigenanteil. |
 | **`CopyOnWriteArrayList` im EventSupport** | Sichere Iteration, während sich ein Listener abmeldet. Kostet bei jeder Änderung eine Kopie — bei einer Handvoll Listenern belanglos. |
+| **Rechenmodell statt Sensor** hinter `TemperatureSource` | Die Methode `nextTemperature(current, target)` rechnet den nächsten Wert aus, statt ihn abzulesen, und merkt sich nichts. Dadurch ist sie ohne Zeitgeber und ohne Thread prüfbar (M-4). Austauschbar sind damit verschiedene Verläufe, nicht echte Hardware — dafür bräuchte es eine Methode ohne Argumente, eine Antwort auf Lesefehler, eine Lebensdauer und womöglich die umgekehrte Richtung. Die Naht hat genau einen Benutzer (`TemperatureSampler`), die Entscheidung bleibt also umkehrbar. |
+| **`TemperatureSampler` merkt sich keinen Zustand** | Er holt den aktuellen Wert bei jedem Takt aus dem `Incubator`, statt eine eigene Kopie zu führen. Zwei Stellen, die dieselbe Wahrheit behaupten, laufen sonst auseinander, sobald jemand anders `updateTemperature` aufruft. |
 
 ## Umfangsgrenzen
 
@@ -101,6 +103,17 @@ erklärbar sein — nicht nur funktionieren.
 - `fire()` wird **außerhalb** eines Sperrbereichs aufgerufen — fremder Listener-Code darf niemals
   unter einer eigenen Sperre laufen.
 - `ScheduledExecutorService` statt `new Thread()`: sauber startbar und vor allem sauber beendbar.
+- `scheduleWithFixedDelay` bricht die **ganze Serie** ab, wenn die Aufgabe eine Ausnahme wirft —
+  lautlos, weil sie in einem `Future` landet, das niemand abfragt. Der Rumpf braucht deshalb sein
+  eigenes `try`/`catch`.
+- `scheduleWithFixedDelay` (Pause nach dem Ende) statt `scheduleAtFixedRate` (feste Termine, die
+  nachgeholt werden). Nachgeholte Messwerte sind wertlos und stauen einen langsamen Listener nur
+  weiter zu.
+- Ein `ScheduledExecutorService` erzeugt **keine** Daemon-Threads. Ohne eigene `ThreadFactory` mit
+  `setDaemon(true)` bleibt die Anwendung nach dem Schließen des Fensters im Hintergrund hängen.
+- Eine `InterruptedException` fängt man nie, ohne das Signal mit
+  `Thread.currentThread().interrupt()` wiederherzustellen — sonst verschluckt man die Nachricht
+  „du sollst aufhören".
 - Ein Schloss nützt nur, wenn **alle** Zugriffe dasselbe benutzen — die lesenden ebenso wie die
   schreibenden. Ein eigenes privates `Object` als Schloss statt `this`, damit von außen niemand
   mitsperren kann.
@@ -167,5 +180,14 @@ Bewusst nicht gelöst, mit Grund:
   ist es dokumentiertes Verhalten statt ungewollter Zufall.
 - **Kein Rückstau-Schutz.** Ein langsamer Listener bremst den Sensor-Thread. Bei einem echten Gerät
   bräuchte es Entkopplung über eine Queue.
+- **Zwei Antworten auf Listener-Fehler im selben Paket.** Der `EventSupport` nimmt einen
+  Fehler-Handler entgegen, der `TemperatureSampler` schreibt den Stacktrace stumpf nach
+  `System.err`. Konsequent wäre auch hier ein hereingereichter Handler; das kostet einen
+  Konstruktorparameter, den bisher niemand braucht.
+- **Ein Listener, der `close()` aufruft, blockiert eine Sekunde.** Der Sampler-Thread steckt dann
+  in `updateTemperature` → `fire()` → Listener → `close()` und wartet auf das Schloss, das der
+  beendende Thread hält — der wiederum in `awaitTermination` auf genau diesen Thread wartet. Es
+  löst sich nach dem Zeitlimit von selbst auf, kostet aber eine Sekunde Stillstand. Verwandt mit
+  I-8, nur andersherum: Fremder Code läuft nicht *unter* der Sperre, sondern *gegen* sie.
 - **Fehlerbehandlung in der UI-Schicht** ist minimal. Der Kern ist abgesichert, die Oberfläche nicht.
 - **Keine automatisierten UI-Tests.** Siehe oben.

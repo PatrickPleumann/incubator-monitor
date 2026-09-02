@@ -88,7 +88,7 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **Etappe 3 — Werteerzeugung fertig, Taktgeber offen** (02.09.2026). Die Liste zeigt den Stand
+Stand: **Etappe 3 abgeschlossen** (03.09.2026). Die Liste zeigt den Stand
 der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
@@ -107,8 +107,8 @@ der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 **Etappe 3 — Gerät und Nebenläufigkeit**
 - [x] 3.1 `TemperatureChangedEvent`
 - [x] 3.2 `Incubator` — I-1 bis I-9, abgesichert über ein privates Schloss, `fire` außerhalb
-- [~] 3.3 Sensor-Simulation — Werteerzeugung fertig (M-1 bis M-4): `TemperatureSource` als Naht, `SimulatedTemperatureSource` als Rechenmodell. Offen: der Taktgeber (SI-1 bis SI-7)
-- [~] 3.4 Tests — 1 bis 8 grün, dazu ein zusätzlicher Test für M-1 (siehe Änderungsprotokoll); offen sind 9 und 10 (gehören zum Taktgeber)
+- [x] 3.3 Sensor-Simulation — `TemperatureSource` als Naht, `SimulatedTemperatureSource` als Rechenmodell, `TemperatureSampler` als Taktgeber (M-1 bis M-4, SI-1 bis SI-7)
+- [x] 3.4 Tests 1 bis 10 grün, dazu ein zusätzlicher Test für M-1 (siehe Änderungsprotokoll)
 
 **Etappe 4 — Oberfläche**
 - [ ] 4.1 Aufbau (U-1 bis U-6)
@@ -616,6 +616,8 @@ Bewusst nicht gelöst. Jeder Punkt hat einen Grund, und der Grund ist wichtiger 
 | **Fehlerbehandlung in der Oberfläche** ist minimal | Der Kern ist abgesichert, die Oberfläche nicht. Bewusste Gewichtung. |
 | **Keine automatisierten UI-Tests** | Siehe Etappe 4. |
 | **Ein werfender Fehler-Handler** — wirft der Handler selbst eine Ausnahme, fliegt sie aus `fire()` heraus und die übrigen Listener gehen leer aus | Ein zweites `try` um den Handler herum würde die Frage nur verschieben: Was passiert, wenn *das* scheitert? Der Handler ist Code des Aufrufers, und ab einer Ebene muss man ihm vertrauen. Benannte Grenze statt stiller Annahme. |
+| **Zwei Antworten auf Listener-Fehler im selben Paket** — `EventSupport` nimmt einen Fehler-Handler entgegen, `TemperatureSampler` schreibt den Stacktrace nach `System.err` | Ein hereingereichter Handler wäre konsequent, kostet aber einen Konstruktorparameter, den bisher kein Aufrufer braucht. Der Sampler hat anders als der Baukasten kein fremdes Publikum. Benannte Ungleichheit statt stiller. |
+| **Ein Listener, der `close()` aufruft, blockiert eine Sekunde** — der Sampler-Thread steckt in `updateTemperature` → `fire()` → Listener → `close()` und wartet auf das Schloss, das der beendende Thread hält; der wartet in `awaitTermination` auf genau diesen Thread | Es löst sich nach dem Zeitlimit von selbst auf, ist also kein echter Stillstand, sondern eine Sekunde Verzögerung. Auflösen ließe es sich nur, indem `close()` das Schloss vor dem Warten wieder freigibt — dann müsste ein zweiter Zustand („wird gerade beendet") mitgeführt werden. Der Aufwand steht hier in keinem Verhältnis. Verwandt mit I-8, nur andersherum: Fremder Code läuft nicht *unter* der Sperre, sondern *gegen* sie. |
 
 ---
 
