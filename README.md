@@ -2,7 +2,7 @@
 
 **English** · [Deutsch](README.de.md)
 
-> **Status: stage 3 of 5 complete** — 2026-09-03
+> **Status: stage 4 of 5 in progress** — 2026-09-03
 
 A simulated laboratory device written in Java: a CO₂ incubator that keeps cell cultures at a
 target temperature, reports its readings from a thread of its own, and is monitored by a JavaFX
@@ -49,7 +49,7 @@ screen, and why the interface could be replaced without touching the device logi
 | 1 | **Scaffolding** | A Gradle project that builds, runs and tests | ✅ done |
 | 2 | **Observer toolkit** | Delivering and cancelling events, under test | ✅ done |
 | 3 | **Device and concurrency** | An incubator reporting from its own thread | ✅ done |
-| 4 | **User interface** | A JavaFX window showing live readings | ⏳ next |
+| 4 | **User interface** | A JavaFX window showing live readings | ⏳ in progress |
 | 5 | **Wrap-up** | README, clean clone, limits stated honestly | ⬜ open |
 
 **Stage 1 — Scaffolding.** Gradle with the Kotlin DSL, a Java 21 toolchain, JavaFX and JUnit. The
@@ -62,13 +62,16 @@ could cancel someone else's, and exceptions thrown by listeners vanished without
 Each was first made visible as a failing test, then fixed.
 
 **Stage 3 — Device and concurrency.** The `Incubator` with its target temperature and tolerance,
-plus a sensor simulation producing a new reading every second. This stage is about atomicity
+plus a sensor simulation producing a new reading at a fixed interval. This stage is about atomicity
 rather than mere visibility, about locks that never enclose foreign code, and about a scheduler
 that can be shut down cleanly.
 
 **Stage 4 — User interface.** A JavaFX window with a reading display, a target-temperature input
 and a start/stop control. Every access from the sensor thread goes through `Platform.runLater(…)`
 — that bridge between threads is what this stage is really about.
+
+*Currently:* the window, the display and the controls are in place; the reading is still static.
+The subscription and the thread bridge are what remains.
 
 **Stage 5 — Wrap-up.** README, a fresh clone that builds and runs with no extra steps, and an
 honest list of what was deliberately left open.
@@ -121,7 +124,8 @@ gradlew test    # all tests
 gradlew run     # start the application
 ```
 
-`gradlew run` currently opens an empty window — the interface is built in stage 4.
+`gradlew run` opens the window with its display and controls. The reading does not move yet —
+the bridge from the sensor thread to the interface is the remaining part of stage 4.
 
 ---
 

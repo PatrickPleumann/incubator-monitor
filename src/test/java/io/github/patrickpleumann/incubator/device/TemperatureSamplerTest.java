@@ -80,4 +80,24 @@ public class TemperatureSamplerTest
             assertTrue(received.get().await(2, TimeUnit.SECONDS), "no updates after restart");
         }
     }
+
+    @Test
+    void samplerReportsWhetherItIsRunning()
+    {
+        //arrange
+        Incubator incubator = new Incubator(37.0, 0.5);
+        TemperatureSource source = (current, target) -> current + 1.0;
+
+        //act + assert
+        try (TemperatureSampler sampler = new TemperatureSampler(incubator, source, Duration.ofMillis(10)))
+        {
+            assertFalse(sampler.isRunning());
+
+            sampler.start();
+            assertTrue(sampler.isRunning());
+
+            sampler.stop();
+            assertFalse(sampler.isRunning());
+        }
+    }
 }

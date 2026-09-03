@@ -1,5 +1,7 @@
 package io.github.patrickpleumann.incubator.device;
 
+import jdk.jshell.spi.ExecutionControl;
+
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -81,7 +83,13 @@ public final class TemperatureSampler implements AutoCloseable
             }
         }
     }
-
+    public boolean isRunning()
+    {
+        synchronized (threadlock)
+        {
+            return scheduler != null;
+        }
+    }
 
     @Override
     public void close()

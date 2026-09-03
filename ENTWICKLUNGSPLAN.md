@@ -88,7 +88,7 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **Etappe 3 abgeschlossen** (03.09.2026). Die Liste zeigt den Stand
+Stand: **Aufgabe 4.1 abgeschlossen** (03.09.2026). Die Liste zeigt den Stand
 der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
@@ -111,7 +111,7 @@ der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 - [x] 3.4 Tests 1 bis 10 grün, dazu ein zusätzlicher Test für M-1 (siehe Änderungsprotokoll)
 
 **Etappe 4 — Oberfläche**
-- [ ] 4.1 Aufbau (U-1 bis U-6)
+- [x] 4.1 Aufbau — U-1 bis U-6, `MonitorView` als eigene Klasse, Verdrahtung über Rückrufe in `IncubatorMonitorApp`
 - [ ] 4.2 Thread-Brücke (U-7 bis U-9)
 - [ ] 4.3 Abnahmeliste von Hand durchgegangen
 
@@ -672,3 +672,7 @@ umgehen ist der einzige Fehler, den man dabei machen kann.
 | 02.09.2026 | Aufbau von Test 5 festgelegt: Listener startet einen zweiten Thread und wartet auf dessen Lebenszeichen | Der Plan schlug `assertTimeoutPreemptively` vor. Das allein hätte nichts bewiesen: Schlösser in Java sind wiedereintrittsfähig, derselbe Thread käme auch unter der eigenen Sperre durch `getCurrentTemperature`. Ein Verklemmen entsteht erst mit einem zweiten Thread. Der Listener startet deshalb einen Kundschafter und wartet mit `CountDownLatch.await(1, SECONDS)` auf dessen Rückmeldung; der Test hängt dadurch nie, sondern meldet sich nach einer Sekunde selbst. |
 | 02.09.2026 | Testliste zu 3.4 um einen Test für M-1 erweitert: „von 20 °C aus liegt der Wert nach 20 Schritten am Sollwert" | Der Gegencheck an Test 8 schlug fehl: Mit `PULL_FACTOR = 0`, also ganz ohne Rückholkraft zum Sollwert, blieb Test 8 **grün**. Grund ist die Wurzel-Abhängigkeit einer Zufallsbewegung — bei Schritten von höchstens ±0,2 °C entfernt sich der Wert über 1000 Schritte nur um rund 3,6 °C und bleibt damit im 5-°C-Band. Test 8 bewacht also das Band (M-3), nicht die Rückholkraft; für M-1 hatte die Liste überhaupt keinen Test. Der neue Test wird mit `PULL_FACTOR = 0` zuverlässig rot, weil der Abstand dann bei rund 17 °C stehen bleibt. Test 8 bleibt erhalten, aber nicht mehr als Nachweis für M-1. |
 | 03.09.2026 | `TemperatureSampler` um `stop()` erweitert; `close()` ruft nur noch `stop()` auf | Anforderung U-6 verlangt eine Start/Stopp-Schaltfläche, der Sampler kannte aber nur `start()` und `close()`. Technisch hätte `close()` gereicht — es setzt `scheduler` auf `null`, ein späteres `start()` legt einfach einen neuen Executor an. Nur heißt `AutoCloseable.close()` in Java üblicherweise „dieses Objekt ist danach verbraucht" (wie `IDisposable.Dispose()` in C#); ein Objekt, das danach wieder auflebt, widerspricht dieser Erwartung. Mit `stop()` steht an der Aufrufstelle, was gemeint ist: `stop()` an der Schaltfläche, `close()` beim Schließen des Fensters (U-9). Dazu ein neuer Test `stoppedSamplerCanBeStartedAgain`, erst rot (Methode fehlte), dann grün. |
+| 03.09.2026 | `TemperatureSampler` um `isRunning()` erweitert, mit Test | Anforderung U-6 verlangt einen Knopf, der zwischen „Start" und „Stop" wechselt — also muss jemand wissen, ob die Simulation läuft. Ein `boolean` in der Oberfläche wäre eine zweite Stelle gewesen, die dieselbe Wahrheit behauptet; genau das ist beim `TemperatureSampler` schon einmal bewusst vermieden worden (siehe `CLAUDE.md`, „merkt sich keinen Zustand"). Sie hätte gestimmt, solange niemand den Sampler an der Oberfläche vorbei anhält. `isRunning()` liest `scheduler != null` unter demselben Schloss wie `start()` und `stop()`. Test `samplerReportsWhetherItIsRunning` erst rot gesehen (Platzhalter `return true`), dann grün. |
+| 03.09.2026 | Oberfläche auf zwei Klassen aufgeteilt: `IncubatorMonitorApp` und `MonitorView` | Der Plan nennt für Etappe 4 keine Typen. Eine einzige Klasse hätte drei Aufgaben vermischt: Anwendungslebenszyklus, Aufbau der Elemente und Verdrahtung mit dem Gerät. Getrennt sitzt die Thread-Brücke aus 4.2 an genau zwei Methoden (`setTemperature`, `setWithinTolerance`) statt verstreut im Layout-Code. |
+| 03.09.2026 | `MonitorView` kennt den `Incubator` nicht; Eingaben laufen über Rückrufe | Für den Sollwert und den Start/Stopp-Knopf muss die Wirkung von der Oberfläche zum Gerät. Statt der View den `Incubator` in den Konstruktor zu geben, bietet sie `setOnTargetSubmitted(DoubleConsumer)` und `setOnSimulationToggled(Runnable)` an; verdrahtet wird in der App. Die View bekommt damit weiterhin nur Zahlen und Wahrheitswerte und bleibt austauschbar. Die Bereichsprüfung 0–100 bleibt im Gerät — die Oberfläche fängt die `IllegalArgumentException` und färbt das Feld rot (U-5), statt die Regel zu wiederholen. |
+| 03.09.2026 | Temperaturanzeige mit `Locale.ROOT` formatiert | `String.format("%.2f")` nimmt sonst die Systemsprache und zeigt `37,00` mit Komma, während `Double.parseDouble` im Eingabefeld nur den Punkt akzeptiert. Der Benutzer hätte nicht eintippen können, was direkt darüber steht. Da die Oberfläche durchgehend englisch beschriftet ist, ist die neutrale Darstellung mit Punkt die passende Seite des Widerspruchs. |

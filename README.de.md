@@ -2,7 +2,7 @@
 
 [English](README.md) · **Deutsch**
 
-> **Stand: Etappe 3 von 5 abgeschlossen** — 03.09.2026
+> **Stand: Etappe 4 von 5 in Arbeit** — 03.09.2026
 
 Ein simuliertes Laborgerät in Java: ein CO₂-Inkubator, der Zellkulturen auf einer Zieltemperatur
 hält, seine Messwerte aus einem eigenen Thread meldet und von einer JavaFX-Oberfläche überwacht
@@ -49,7 +49,7 @@ Fenster, und deshalb wäre die Oberfläche austauschbar, ohne die Gerätelogik a
 | 1 | **Gerüst** | Gradle-Projekt, das startet und testet | ✅ fertig |
 | 2 | **Observer-Baukasten** | Ereignisse zustellen und abbestellen, getestet | ✅ fertig |
 | 3 | **Gerät und Nebenläufigkeit** | Ein Inkubator, der aus einem eigenen Thread meldet | ✅ fertig |
-| 4 | **Oberfläche** | JavaFX-Fenster, das Messwerte anzeigt | ⏳ als Nächstes |
+| 4 | **Oberfläche** | JavaFX-Fenster, das Messwerte anzeigt | ⏳ in Arbeit |
 | 5 | **Abrunden** | README, frischer Klon, Grenzen benannt | ⬜ offen |
 
 **Etappe 1 — Gerüst.** Gradle mit Kotlin-DSL, Java-21-Toolchain, JavaFX und JUnit. Die drei Pakete
@@ -62,13 +62,16 @@ Abmelden konnte fremde Abos beenden, und Fehler aus Listenern verschwanden ohne 
 wurden erst als roter Test sichtbar gemacht und dann behoben.
 
 **Etappe 3 — Gerät und Nebenläufigkeit.** Der `Incubator` mit Zieltemperatur und Toleranz, dazu
-eine Sensor-Simulation, die im Sekundentakt neue Messwerte erzeugt. Hier geht es um Atomarität
+eine Sensor-Simulation, die in festem Takt neue Messwerte erzeugt. Hier geht es um Atomarität
 statt bloßer Sichtbarkeit, um Sperren, die niemals fremden Code umschließen, und um einen
 Zeitgeber, der sich sauber beenden lässt.
 
 **Etappe 4 — Oberfläche.** Ein JavaFX-Fenster mit Messwertanzeige, Sollwert-Eingabe und
 Start/Stopp. Jeder Zugriff aus dem Sensor-Thread läuft über `Platform.runLater(…)` — die Brücke
 zwischen den Threads ist der eigentliche Inhalt dieser Etappe.
+
+*Zurzeit:* Fenster, Anzeige und Bedienelemente stehen; der Messwert bewegt sich noch nicht.
+Was fehlt, ist das Abo und die Brücke zwischen den Threads.
 
 **Etappe 5 — Abrunden.** README, ein frischer Klon, der ohne Nacharbeit baut und startet, und eine
 ehrliche Liste dessen, was bewusst offen blieb.
@@ -121,7 +124,8 @@ gradlew test    # alle Tests
 gradlew run     # Anwendung starten
 ```
 
-`gradlew run` öffnet derzeit noch ein leeres Fenster — die Oberfläche entsteht in Etappe 4.
+`gradlew run` öffnet das Fenster mit Anzeige und Bedienelementen. Der Messwert bewegt sich noch
+nicht — die Brücke vom Sensor-Thread zur Oberfläche ist der Rest von Etappe 4.
 
 ---
 
