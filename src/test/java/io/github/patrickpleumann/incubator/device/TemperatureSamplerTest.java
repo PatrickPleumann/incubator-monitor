@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,5 +54,30 @@ public class TemperatureSamplerTest
         //assert
         assertEquals(afterClose, counter.get());
         assertDoesNotThrow(()-> sampler.close());
+    }
+
+    @Test
+    void stoppedSamplerCanBeStartedAgain() throws Exception
+    {
+        //arrange
+        Incubator incubator = new Incubator(37.0, 0.5);
+        TemperatureSource source = (current, target) -> current + 1.0;
+        AtomicReference<CountDownLatch> received = new AtomicReference<>(new CountDownLatch(3));
+        incubator.temperatureChanged().subscribe(event -> received.get().countDown());
+
+        //act
+        try(TemperatureSampler sampler =
+                new TemperatureSampler(incubator, source, Duration.ofMillis(10)))
+        {
+            sampler.start();
+            assertTrue(received.get().await(2, TimeUnit.SECONDS), "sampler never started");
+            sampler.stop();
+
+            received.set(new CountDownLatch(3));
+            sampler.start();
+
+            //assert
+            assertTrue(received.get().await(2, TimeUnit.SECONDS), "no updates after restart");
+        }
     }
 }

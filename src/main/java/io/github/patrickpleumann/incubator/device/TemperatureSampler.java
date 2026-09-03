@@ -58,8 +58,7 @@ public final class TemperatureSampler implements AutoCloseable
         }
     }
 
-    @Override
-    public void close()
+    public void stop()
     {
         synchronized (threadlock)
         {
@@ -81,5 +80,12 @@ public final class TemperatureSampler implements AutoCloseable
                 scheduler = null;
             }
         }
+    }
+
+
+    @Override
+    public void close()
+    {
+        stop();
     }
 }
