@@ -11,17 +11,23 @@ import javafx.stage.Stage;
 public class IncubatorMonitorApp extends Application {
 
     private static final String WINDOW_TITLE = "Incubator Monitor";
-    private static final int WINDOW_WIDTH = 480;
-    private static final int WINDOW_HEIGHT = 320;
+    private static final int WINDOW_WIDTH = 800;
+    private static final int WINDOW_HEIGHT = 600;
+    private MonitorView monitorView;
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage)
+    {
+        monitorView = new MonitorView();
+
         stage.setTitle(WINDOW_TITLE);
-        stage.setScene(new Scene(new BorderPane(), WINDOW_WIDTH, WINDOW_HEIGHT));
+        stage.setScene(new Scene(monitorView.getRoot(),WINDOW_WIDTH ,WINDOW_HEIGHT));
+
         stage.show();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         launch(args);
     }
 }
