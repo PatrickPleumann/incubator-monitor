@@ -271,6 +271,37 @@ etwas zeigen, was die vier Kernthemen nicht schon zeigen.
 
 ---
 
+## Wo KI beteiligt war
+
+Claude Code war in diesem Projekt Reviewer, nicht Code-Generator. Die Regel dazu stand fest, bevor
+die erste Zeile getippt war: *Generierter Code wird nicht übernommen, bevor er verstanden ist.* Wie
+das aussieht, an der jüngsten Runde — `TemperatureSampler`, mit einer bewusst engen Frage übergeben:
+**Gibt es redundante lokale Variablen oder fehlende Werte?**
+
+Zwei Antworten kamen zurück, nur eine davon wurde zu einer Änderung.
+
+- **Keine redundanten lokalen Variablen.** Die benannte `ThreadFactory` und das `Runnable` in
+  `start()` ließen sich in ihre Aufrufe hineinziehen. Redundant sind sie deshalb nicht — die Namen
+  sind es, die die Methode lesbar halten. Hier wurde nichts geändert.
+- **Ein fehlender Wert.** Das Messintervall wurde auf `null` geprüft, aber nie darauf, ob es
+  **positiv** ist. `Duration.ZERO` kam durch den Konstruktor und scheiterte erst später in
+  `start()`, wo `scheduleWithFixedDelay` eine Wartezeit von null ablehnt — eine Ausnahme weit weg
+  von ihrer Ursache. Daneben schnitt `interval.toMillis()` ab: Ein Intervall unter einer
+  Millisekunde wurde zu null und scheiterte genauso.
+
+Die Reparatur ging den Weg, den in `device` alles geht: zuerst die fehlschlagenden Tests — beide
+aus dem richtigen Grund rot gesehen, einer wegen einer ausbleibenden Ausnahme, einer wegen einer
+Ausnahme an der falschen Stelle — dann die Prüfung im Konstruktor und der Wechsel auf `toNanos()`.
+Eine dritte, rein kosmetische Anmerkung (zwei `else`-Zweige hinter einem `return`) war schon vorher
+von Hand erledigt.
+
+Diese Trennung ist der Punkt des Abschnitts. Die Befunde kamen aus dem Review; die Entscheidung,
+welcher davon eine Änderung wert war, nicht. Beide stehen im Review-Protokoll von
+[`ENTWICKLUNGSPLAN.md`](ENTWICKLUNGSPLAN.md) — an derselben Stelle, die auch festhält, was **nicht**
+übernommen wurde.
+
+---
+
 ## Mehr Details
 
 - **[`CLAUDE.md`](CLAUDE.md)** — warum das Projekt so geschnitten ist, welche Entscheidungen

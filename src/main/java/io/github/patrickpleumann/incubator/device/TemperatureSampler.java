@@ -18,9 +18,11 @@ public final class TemperatureSampler implements AutoCloseable
 
     public TemperatureSampler(Incubator incubator, TemperatureSource source, Duration interval)
     {
+        requireValidInterval(interval);
+
         this.incubator  =   Objects.requireNonNull(incubator);
         this.source     =   Objects.requireNonNull(source);
-        this.interval   =   Objects.requireNonNull(interval);
+        this.interval   =   interval;
     }
 
     public void start()
@@ -29,32 +31,30 @@ public final class TemperatureSampler implements AutoCloseable
         {
             if(scheduler != null)
                 return;
-            else
+
+            ThreadFactory factory = runnable ->
             {
-                ThreadFactory factory = runnable ->
-                {
-                  Thread thread = new Thread(runnable, "temperature-sampler");
-                  thread.setDaemon(true);
-                  return thread;
-                };
+                Thread thread = new Thread(runnable, "temperature-sampler");
+                thread.setDaemon(true);
+                return thread;
+            };
 
-                scheduler = Executors.newSingleThreadScheduledExecutor(factory);
-                Runnable measurement = () ->
+            scheduler = Executors.newSingleThreadScheduledExecutor(factory);
+            Runnable measurement = () ->
+            {
+                try
                 {
-                    try
-                    {
-                        double current = incubator.getCurrentTemperature();
-                        double next = source.nextTemperature(current, incubator.getTargetTemperature());
-                        incubator.updateTemperature(next);
-                    }
-                    catch (RuntimeException ex)
-                    {
-                        ex.printStackTrace();
-                    }
-                };
+                    double current = incubator.getCurrentTemperature();
+                    double next = source.nextTemperature(current, incubator.getTargetTemperature());
+                    incubator.updateTemperature(next);
+                }
+                catch (RuntimeException ex)
+                {
+                    ex.printStackTrace();
+                }
+            };
 
-                scheduler.scheduleWithFixedDelay(measurement, 0, interval.toMillis(), TimeUnit.MILLISECONDS);
-            }
+            scheduler.scheduleWithFixedDelay(measurement, 0, interval.toNanos(), TimeUnit.NANOSECONDS);
         }
     }
 
@@ -64,21 +64,19 @@ public final class TemperatureSampler implements AutoCloseable
         {
             if(scheduler == null)
                 return;
-            else
+
+            try
             {
-                try
-                {
-                    scheduler.shutdown();
-                    if(!scheduler.awaitTermination(1, TimeUnit.SECONDS))
-                        scheduler.shutdownNow();
-                }
-                catch (InterruptedException ex)
-                {
+                scheduler.shutdown();
+                if(!scheduler.awaitTermination(1, TimeUnit.SECONDS))
                     scheduler.shutdownNow();
-                    Thread.currentThread().interrupt();
-                }
-                scheduler = null;
             }
+            catch (InterruptedException ex)
+            {
+                scheduler.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+            scheduler = null;
         }
     }
     public boolean isRunning()
@@ -93,5 +91,12 @@ public final class TemperatureSampler implements AutoCloseable
     public void close()
     {
         stop();
+    }
+
+    private static void requireValidInterval(Duration value)
+    {
+        Objects.requireNonNull(value);
+        if(value.isZero() || value.isNegative())
+            throw new IllegalArgumentException("Value: " + value + " has to be a positive duration");
     }
 }

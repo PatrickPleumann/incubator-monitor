@@ -100,4 +100,33 @@ public class TemperatureSamplerTest
             assertFalse(sampler.isRunning());
         }
     }
+
+    @Test
+    void anIntervalOfZeroOrLessIsRejected()
+    {
+        //arrange
+        Incubator incubator = new Incubator(37.0, 0.5);
+        TemperatureSource source = (current, target) -> current + 1.0;
+
+        //act + assert
+        assertThrows(IllegalArgumentException.class,
+                () -> new TemperatureSampler(incubator, source, Duration.ZERO));
+        assertThrows(IllegalArgumentException.class,
+                () -> new TemperatureSampler(incubator, source, Duration.ofMillis(-1)));
+    }
+
+    @Test
+    void anIntervalBelowOneMillisecondSurvives()
+    {
+        //arrange
+        Incubator incubator = new Incubator(37.0, 0.5);
+        TemperatureSource source = (current, target) -> current + 1.0;
+
+        //act + assert
+        try (TemperatureSampler sampler =
+                     new TemperatureSampler(incubator, source, Duration.ofNanos(500_000)))
+        {
+            assertDoesNotThrow(sampler::start, "interval was truncated to zero");
+        }
+    }
 }

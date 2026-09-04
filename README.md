@@ -266,6 +266,36 @@ them would show anything the four core topics do not already show.
 
 ---
 
+## Where AI was used
+
+Claude Code took part in this project as a reviewer, not as a code generator. The rule was written
+down before the first line was typed: *generated code is not adopted until it is understood.* What
+that looks like in practice, taking the most recent round as the example — `TemperatureSampler`,
+handed over with a deliberately narrow question: **are there redundant local variables, or missing
+values?**
+
+Two answers came back, and only one of them turned into a change.
+
+- **No redundant locals.** The named `ThreadFactory` and `Runnable` in `start()` could be inlined
+  into their calls. They are not redundant — the names are what keep the method readable. Nothing
+  changed here.
+- **A missing value.** The sampling interval was checked for `null` but never for being
+  **positive**. `Duration.ZERO` passed the constructor and only failed later inside `start()`,
+  where `scheduleWithFixedDelay` rejects a delay of zero — an exception raised far from its cause.
+  Alongside it, `interval.toMillis()` truncated: an interval below a millisecond became zero and
+  failed the same way.
+
+The repair took the route everything in `device` takes: the failing tests first — both were seen
+red for the right reasons, one for a missing exception, one for an exception thrown in the wrong
+place — then the check in the constructor and the switch to `toNanos()`. A third, purely cosmetic
+remark (two `else` branches after a `return`) was applied by hand before the rest was touched.
+
+That split is the point of the section. The findings came from the review; the decision about which
+of them was worth acting on did not. Both are written down in the review log of
+[`ENTWICKLUNGSPLAN.md`](ENTWICKLUNGSPLAN.md), the same place that records what was **not** adopted.
+
+---
+
 ## Further reading
 
 Both documents below are written in German.
