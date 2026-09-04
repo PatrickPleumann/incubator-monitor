@@ -19,8 +19,9 @@ Der Messwert entsteht auf einem anderen Thread als dem, der die Oberfläche zeic
 dieser Grenze liegt der interessante Teil.
 
 Das Projekt ist der praktische Teil eines Umstiegs von C# nach Java. Der Anspruch ist bewusst
-nicht „möglichst viele Features", sondern **jede Entscheidung im Code begründen können**. Ein
-kleines Projekt, das durchdacht ist, ist hier mehr wert als ein großes, das nur läuft.
+nicht „möglichst viele Features", sondern **nachvollziehbar zu sein**: Die Entscheidungen, die
+etwas tragen, sind aufgeschrieben — mitsamt denen, die bewusst offen geblieben sind. Ein kleines
+Projekt, das durchdacht ist, ist hier mehr wert als ein großes, das nur läuft.
 
 Vier Themen kommen dabei in ihrer natürlichen Reihenfolge zusammen: das Observer-Muster (Java hat
 kein `event`-Schlüsselwort — wer Ereignisse will, baut sie), Nebenläufigkeit, die Anbindung an
@@ -182,14 +183,55 @@ Java 21 LTS · Gradle (Kotlin-DSL) · JavaFX 21 · JUnit
 
 ## Bewusste Entscheidungen und offene Punkte
 
-**Java 21 LTS, nicht die neueste Fassung.** 21 ist die Version, die in Firmen tatsächlich läuft.
-Das kostet die kurze `void main()` neuerer Ausgaben — dafür wird die klassische
-`public static void main(String[] args)` geübt.
+### Warum der Code so aussieht, wie er aussieht
+
+**Ein privates Schloss statt `synchronized(this)`.** Mit `this` als Schloss könnte jeder Aufrufer
+von außen mitsperren und das Gerät blockieren, ohne dass in der Klasse etwas darauf hinweist. Ein
+privates Feld lässt sich nur von innen sperren.
+
+**`fire()` läuft außerhalb des Sperrbereichs.** Das Ereignis entsteht im geschützten Block und wird
+außerhalb zugestellt. Listener-Code ist fremder Code, und fremder Code darf niemals laufen, während
+dieses Objekt seine eigene Sperre hält — so baut man eine Verklemmung. Der Preis steht unter den
+offenen Punkten: Ereignisse können in anderer Reihenfolge ankommen, als die Änderungen geschahen.
+
+**Der Sampler merkt sich keinen eigenen Zustand.** Bei jedem Takt holt er den aktuellen Wert aus
+dem Inkubator, statt eine eigene Kopie zu führen. Zwei Stellen, die dieselbe Wahrheit behaupten,
+laufen auseinander, sobald jemand anders `updateTemperature` aufruft.
+
+**`scheduleWithFixedDelay`, nicht `scheduleAtFixedRate`.** Feste Termine werden nachgeholt. Ein
+verspäteter Messwert ist wertlos, und das Nachholen würde einen ohnehin zu langsamen Listener nur
+weiter zustauen.
+
+**Daemon-Threads für den Sampler.** Ein `ScheduledExecutorService` erzeugt von sich aus keine. Ohne
+eine `ThreadFactory` mit `setDaemon(true)` läuft der Prozess nach dem Schließen des Fensters weiter.
+
+**Werte aus dem Gerät werden vor `Platform.runLater(…)` gelesen, nie darin.** Der Block läuft
+später auf dem FX-Thread. Eine Frage, die darin steht, wird mit dem Zustand dieses späteren
+Moments beantwortet — die Zahl käme dann aus einer Messung und die Statusfarbe aus der nächsten.
+
+**`MonitorView` kennt den `Incubator` nicht.** Sie bekommt Zahlen und Wahrheitswerte und meldet
+Eingaben über `DoubleConsumer` und `Runnable` zurück. Es geht dabei **nicht** um Lebensdauern — der
+Inkubator lebte so oder so gleich lang —, sondern darum, wer wen kennen darf: Löscht man das ganze
+Paket `ui`, kompilieren `device` und `events` weiter und ihre Tests laufen weiter. Genau deshalb
+brauchen die Tests auch kein Fenster auf dem Bildschirm.
+
+**Aufgeräumt wird in `Application.stop()`, nicht in `stage.setOnCloseRequest(…)`.** Die Laufzeit
+ruft `stop()` auf jedem Weg des Herunterfahrens auf; ein Schließen-Ereignis feuert nur beim
+Zuklicken dieses einen Fensters und kann von einem anderen Handler abgefangen werden.
 
 **`CopyOnWriteArrayList` für die Listener.** Ein Listener darf sein eigenes Abo beenden, während
 `fire()` noch durch die Liste läuft. Copy-on-write iteriert über eine Momentaufnahme, das Entfernen
 kann die Schleife also nicht stören. Der Preis ist eine Kopie bei jeder Änderung — bei einer
 Handvoll Listenern belanglos, bei Tausenden die falsche Wahl.
+
+**Rechenmodell statt Sensor hinter der Naht** — die längste dieser Entscheidungen hat
+[einen eigenen Abschnitt](#eine-entwurfsentscheidung-rechenmodell-statt-sensor) weiter oben.
+
+### Werkzeugwahl
+
+**Java 21 LTS, nicht die neueste Fassung.** 21 ist die Version, die in Firmen tatsächlich läuft.
+Das kostet die kurze `void main()` neuerer Ausgaben — dafür wird die klassische
+`public static void main(String[] args)` geübt.
 
 **Die Oberfläche entsteht in Java-Code, nicht in FXML.** Ein Werkzeug weniger, das schiefgehen
 kann. FXML bringt bei diesem Umfang keinen Vorteil.

@@ -19,8 +19,9 @@ produced on a different thread than the one drawing the interface. That boundary
 interesting part of this project lives.
 
 The project is the hands-on half of a move from C# to Java. The goal is deliberately not "as many
-features as possible" but **being able to justify every decision in the code**. A small project
-that is thought through is worth more here than a large one that merely runs.
+features as possible" but **being traceable**: the decisions that carry weight are written down —
+including the ones deliberately left open. A small project that is thought through is worth more
+here than a large one that merely runs.
 
 Four topics come together in their natural order: the observer pattern (Java has no `event`
 keyword — if you want events, you build them), concurrency, binding to a UI that owns its own
@@ -179,14 +180,56 @@ Java 21 LTS · Gradle (Kotlin DSL) · JavaFX 21 · JUnit
 
 ## Deliberate decisions and open points
 
-**Java 21 LTS, not the newest release.** 21 is the version companies actually run. It costs the
-short `void main()` of newer releases — in exchange, the classic
-`public static void main(String[] args)` gets practised.
+### Why the code looks the way it does
+
+**A private lock object, not `synchronized(this)`.** With `this` as the monitor, any outside caller
+could lock the incubator from the outside and deadlock it, and nothing in the class would show why.
+A private field can only be locked from inside.
+
+**`fire()` runs outside the lock.** The event is built inside the guarded block and delivered
+outside it. Listener code is foreign code, and foreign code must never execute while this object
+holds its own lock — that is how a deadlock is built. The price is stated under the open points:
+events can arrive in a different order than the changes happened.
+
+**The sampler keeps no state of its own.** On every tick it asks the incubator for the current
+reading instead of remembering its own copy. Two places claiming the same truth drift apart as soon
+as anyone else calls `updateTemperature`.
+
+**`scheduleWithFixedDelay`, not `scheduleAtFixedRate`.** Fixed rate catches up on missed runs. A
+late reading is worthless, and catching up would only pile more work on a listener that is already
+too slow.
+
+**Daemon threads for the sampler.** A `ScheduledExecutorService` does not create them by itself.
+Without a `ThreadFactory` setting `setDaemon(true)`, the process keeps running after the window is
+closed.
+
+**Device values are read before `Platform.runLater(…)`, never inside it.** The block runs later, on
+the FX thread. A question asked inside it would be answered with the state of that later moment —
+the number would come from one reading and the status colour from the next.
+
+**`MonitorView` does not know the `Incubator`.** It is handed numbers and booleans and reports input
+back through `DoubleConsumer` and `Runnable`. This is not about object lifetimes — the incubator
+would live just as long either way — but about who may know whom: delete the whole `ui` package and
+`device` and `events` still compile and their tests still run. That is also why the tests need no
+window on screen.
+
+**Cleanup in `Application.stop()`, not in `stage.setOnCloseRequest(…)`.** The runtime calls `stop()`
+on every shutdown path; a close request fires only when the user closes that one window, and
+another handler can swallow it.
 
 **`CopyOnWriteArrayList` for the listeners.** A listener may cancel its own subscription while
 `fire()` is still walking the list. Copy-on-write iterates over a snapshot, so the removal cannot
 disturb the loop. It copies the list on every change — meaningless for a handful of listeners, and
 the wrong choice for thousands.
+
+**A model rather than a sensor behind the seam** — the longest of these decisions has
+[its own section](#one-design-decision-a-model-not-a-sensor) above.
+
+### Tooling
+
+**Java 21 LTS, not the newest release.** 21 is the version companies actually run. It costs the
+short `void main()` of newer releases — in exchange, the classic
+`public static void main(String[] args)` gets practised.
 
 **The interface is built in Java code, not FXML.** One tool fewer that can go wrong. FXML buys
 nothing at this size.
