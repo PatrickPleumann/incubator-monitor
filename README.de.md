@@ -2,7 +2,7 @@
 
 [English](README.md) · **Deutsch**
 
-> **Stand: Etappen 1–4 fertig, Etappe 5 in Arbeit** — 04.09.2026
+> **Stand: abgeschlossen — alle fünf Etappen fertig** — 04.09.2026
 
 Ein simuliertes Laborgerät in Java: ein CO₂-Inkubator, der Zellkulturen auf einer Zieltemperatur
 hält, seine Messwerte aus einem eigenen Thread meldet und von einer JavaFX-Oberfläche überwacht
@@ -82,7 +82,7 @@ wie der Code.
 | 2 | **Observer-Baukasten** | Ereignisse zustellen und abbestellen, getestet | ✅ fertig |
 | 3 | **Gerät und Nebenläufigkeit** | Ein Inkubator, der aus einem eigenen Thread meldet | ✅ fertig |
 | 4 | **Oberfläche** | JavaFX-Fenster, das Messwerte anzeigt | ✅ fertig |
-| 5 | **Abrunden** | README, frischer Klon, Grenzen benannt | ⏳ in Arbeit |
+| 5 | **Abrunden** | README, frischer Klon, Grenzen benannt | ✅ fertig |
 
 **Etappe 1 — Gerüst.** Gradle mit Kotlin-DSL, Java-21-Toolchain, JavaFX und JUnit. Die drei Pakete
 und ein leeres Fenster, das sich sauber schließt.
@@ -106,7 +106,9 @@ Die schriftliche Abnahmeliste wurde von Hand durchgegangen und in allen neun Pun
 siehe [Abnahme](#abnahme) weiter unten.
 
 **Etappe 5 — Abrunden.** README, ein frischer Klon, der ohne Nacharbeit baut und startet, und eine
-ehrliche Liste dessen, was bewusst offen blieb.
+ehrliche Liste dessen, was bewusst offen blieb. Der Klon entstand am 04.09.2026 mit einer *frischen*
+Gradle-Ablage, JavaFX und JUnit wurden also neu geladen statt aus einem Zwischenspeicher genommen:
+Tests grün, Fenster startet, Schließen sauber. Nachzutragen war nichts.
 
 Jede Etappe endet in einem vorzeigbaren Zustand. Was da ist, läuft; die Tests sind grün.
 

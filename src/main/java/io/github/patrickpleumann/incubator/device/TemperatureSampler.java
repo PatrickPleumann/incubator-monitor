@@ -1,7 +1,5 @@
 package io.github.patrickpleumann.incubator.device;
 
-import jdk.jshell.spi.ExecutionControl;
-
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.Executors;

@@ -88,7 +88,7 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **Aufgabe 5.1 abgeschlossen** (04.09.2026), offen ist nur noch 5.2. Die Liste zeigt den Stand
+Stand: **Alle fünf Etappen abgeschlossen** (04.09.2026). Die Liste zeigt den Stand
 der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
@@ -117,7 +117,7 @@ der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 5 — Abrunden**
 - [x] 5.1 README überarbeiten — vier geforderte Abschnitte vollständig, Screenshot ergänzt
-- [ ] 5.2 Frischer Klon baut, testet und startet
+- [x] 5.2 Frischer Klon baut, testet und startet — nichts fehlte (siehe Review-Protokoll)
 
 ---
 
@@ -646,6 +646,7 @@ kam wann, was wurde daraus, und **was wurde bewusst nicht übernommen**.
 | Datum | Etappe | Befund | Entscheidung |
 |---|---|---|---|
 | 04.09.2026 | 4 | Abnahmeliste 4.3 vollständig von Hand durchgegangen. Acht Punkte ohne Auffälligkeit. Beim Speicher-Punkt zeigte die Heap-Kurve über zehn Minuten eine reine Treppe nach oben (17 → 59 MB), ohne jeden Einbruch — der erwartete Sägezahn fehlte vollständig. | **Kein Befund.** Ursache war der Heap von 8 GB: G1 hatte in zehn Minuten nur zwei Young- und eine Old-Sammlung nötig, räumte also faktisch gar nicht auf. Nach erzwungenem „GC ausführen" fiel der Wert auf 9 MB — also **unter** den ersten Boden von 17 MB —, der zugesicherte Speicher von 110 auf 41 MB. Es bleibt nichts liegen. Nachtrag um 17:11 Uhr: Die JVM räumte danach **von selbst** auf, bis auf 10,5 MB — ein zweiter, unabhängig entstandener Tiefpunkt auf gleicher Höhe. Merksatz: Bei großzügigem Heap sagt eine steigende Kurve nichts; verglichen werden ausschließlich Tiefpunkte, und ein selbst gewählter wiegt schwerer als ein erzwungener. Belege: `docs/acceptance-heap.png` (grün = erzwungen, rot = automatisch) und `docs/acceptance-heap-30min.png` — dort räumt die JVM über eine halbe Stunde dreimal von selbst auf, jedes Mal auf denselben Boden von rund 10 MB. Ein Leck würde diesen Boden mit jedem Zyklus anheben. |
+| 04.09.2026 | 5 | Aufgabe 5.2: Klon von GitHub nach `E:\Java Projects\clone-test`, dort `gradlew test` und `gradlew run` mit einer **frischen** Gradle-Ablage (`--gradle-user-home`), damit auch JavaFX und JUnit neu geladen werden statt aus dem Zwischenspeicher zu kommen. | **Nichts fehlte.** Dateiliste des Klons identisch mit dem Original, alle fünf Bilder in `docs/` vorhanden, Tests grün, Fenster startet, Schließen beendet den Prozess mit Exit-Code 0 und ohne Ausnahme. Der übliche Fund dieses Schritts — eine nie committete Datei oder eine zu weit gefasste `.gitignore` — blieb aus. **Nicht übernommen:** Gradle meldet die Nutzung veralteter Funktionen, die mit Gradle 10 wegfallen. Für den aktuellen Build folgenlos; nachgegangen wird dem erst, wenn ein Grund dazu besteht. |
 
 ---
 

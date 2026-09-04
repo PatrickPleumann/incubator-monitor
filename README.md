@@ -2,7 +2,7 @@
 
 **English** · [Deutsch](README.de.md)
 
-> **Status: stages 1–4 done, stage 5 in progress** — 2026-09-04
+> **Status: complete — all five stages done** — 2026-09-04
 
 A simulated laboratory device written in Java: a CO₂ incubator that keeps cell cultures at a
 target temperature, reports its readings from a thread of its own, and is monitored by a JavaFX
@@ -81,7 +81,7 @@ Click either one to open it full size.
 | 2 | **Observer toolkit** | Delivering and cancelling events, under test | ✅ done |
 | 3 | **Device and concurrency** | An incubator reporting from its own thread | ✅ done |
 | 4 | **User interface** | A JavaFX window showing live readings | ✅ done |
-| 5 | **Wrap-up** | README, clean clone, limits stated honestly | ⏳ in progress |
+| 5 | **Wrap-up** | README, clean clone, limits stated honestly | ✅ done |
 
 **Stage 1 — Scaffolding.** Gradle with the Kotlin DSL, a Java 21 toolchain, JavaFX and JUnit. The
 three packages, plus an empty window that closes cleanly.
@@ -105,7 +105,9 @@ The written acceptance list was walked through by hand and passed on all nine po
 [Acceptance](#acceptance) below.
 
 **Stage 5 — Wrap-up.** README, a fresh clone that builds and runs with no extra steps, and an
-honest list of what was deliberately left open.
+honest list of what was deliberately left open. The clone was made on 2026-09-04 with a *fresh*
+Gradle home, so JavaFX and JUnit were downloaded again rather than taken from a local cache: tests
+green, window starts, shutdown clean. Nothing had to be added afterwards.
 
 Every stage ends in a presentable state. Whatever exists, runs; the tests are green.
 
