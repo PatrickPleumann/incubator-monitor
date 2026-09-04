@@ -4,7 +4,9 @@ import io.github.patrickpleumann.incubator.device.Incubator;
 import io.github.patrickpleumann.incubator.device.SimulatedTemperatureSource;
 import io.github.patrickpleumann.incubator.device.TemperatureSampler;
 
+import io.github.patrickpleumann.incubator.events.Subscription;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -24,10 +26,22 @@ public class IncubatorMonitorApp extends Application {
     private final TemperatureSampler  sampler = new TemperatureSampler
             (incubator, new SimulatedTemperatureSource(new Random()), Duration.ofMillis(500));
 
+    private Subscription subscription;
+
     @Override
     public void start(Stage stage)
     {
         monitorView = new MonitorView();
+
+        subscription = incubator.temperatureChanged().subscribe(event ->
+        {
+            boolean isWithin = incubator.isWithinTolerance();
+            Platform.runLater (() ->
+            {
+                monitorView.setTemperature(event.currentCelsius());
+                monitorView.setWithinTolerance(isWithin);
+            });
+        });
 
         monitorView.setTemperature(incubator.getCurrentTemperature());
         monitorView.setWithinTolerance(incubator.isWithinTolerance());
@@ -38,6 +52,13 @@ public class IncubatorMonitorApp extends Application {
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(monitorView.getRoot(),WINDOW_WIDTH ,WINDOW_HEIGHT));
         stage.show();
+    }
+
+    @Override
+    public void stop()
+    {
+        subscription.close();
+        sampler.close();
     }
 
     private void toggleSimulation()

@@ -107,10 +107,10 @@
   <line x1="422" y1="828" x2="422" y2="858" stroke="#8b98a5" stroke-width="2" marker-end="url(#arrow)"/>
 
   <rect x="92" y="860" width="660" height="106" rx="8" fill="#141b22" stroke="#ff7d00" stroke-dasharray="7 5"/>
-  <text x="112" y="888" fill="#ffb066" font-size="14" font-weight="bold">Platform.runLater( &#8230; )   &#8212;   stage 4.2, not built yet</text>
-  <text x="112" y="912" fill="#9fb0c3" font-size="12">a listener on incubator.temperatureChanged() will hand the value over</text>
-  <text x="112" y="934" fill="#9fb0c3" font-size="12">to view.setTemperature and view.setWithinTolerance</text>
-  <text x="112" y="955" fill="#c9a184" font-size="11.5">today the application registers no listener at all &#8212; only the tests do</text>
+  <text x="112" y="888" fill="#ffb066" font-size="14" font-weight="bold">Platform.runLater( &#8230; )   &#8212;   the crossing</text>
+  <text x="112" y="912" fill="#9fb0c3" font-size="12">the listener reads incubator.isWithinTolerance() here, on the sampler thread,</text>
+  <text x="112" y="934" fill="#9fb0c3" font-size="12">then hands value and flag to view.setTemperature / setWithinTolerance</text>
+  <text x="112" y="955" fill="#c9a184" font-size="11.5">both updates share one runLater block &#8212; two would let the view draw between them</text>
 
   <rect x="792" y="856" width="420" height="114" rx="8" fill="#0e2a2a" stroke="#3ad4c4"/>
   <text x="812" y="882" fill="#7ee0d3" font-size="13" font-weight="bold">Invariant &#183; the one rule of stage 4</text>
@@ -128,7 +128,7 @@
   <text x="112" y="1094" fill="#6e7d8d" font-size="11">the view is told what to show; it never asks the device</text>
 
   <rect x="792" y="998" width="420" height="106" rx="8" fill="#161d26" stroke="#2c3644"/>
-  <text x="812" y="1024" fill="#e6edf3" font-size="13" font-weight="bold">What already happens today</text>
+  <text x="812" y="1024" fill="#e6edf3" font-size="13" font-weight="bold">Before the first tick</text>
   <text x="812" y="1048" fill="#9fb0c3" font-size="11.5">IncubatorMonitorApp.start() calls both setters once,</text>
   <text x="812" y="1067" fill="#9fb0c3" font-size="11.5">directly on the FX thread. That is why the window</text>
   <text x="812" y="1086" fill="#9fb0c3" font-size="11.5">shows 37.00 &#176;C and a green dot before anything runs.</text>

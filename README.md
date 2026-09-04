@@ -2,7 +2,7 @@
 
 **English** · [Deutsch](README.de.md)
 
-> **Status: stage 4 of 5 in progress** — 2026-09-03
+> **Status: stages 1–4 done, stage 5 in progress** — 2026-09-04
 
 A simulated laboratory device written in Java: a CO₂ incubator that keeps cell cultures at a
 target temperature, reports its readings from a thread of its own, and is monitored by a JavaFX
@@ -60,8 +60,8 @@ Click either one to open it full size.
 | 1 | **Scaffolding** | A Gradle project that builds, runs and tests | ✅ done |
 | 2 | **Observer toolkit** | Delivering and cancelling events, under test | ✅ done |
 | 3 | **Device and concurrency** | An incubator reporting from its own thread | ✅ done |
-| 4 | **User interface** | A JavaFX window showing live readings | ⏳ in progress |
-| 5 | **Wrap-up** | README, clean clone, limits stated honestly | ⬜ open |
+| 4 | **User interface** | A JavaFX window showing live readings | ✅ done |
+| 5 | **Wrap-up** | README, clean clone, limits stated honestly | ⏳ in progress |
 
 **Stage 1 — Scaffolding.** Gradle with the Kotlin DSL, a Java 21 toolchain, JavaFX and JUnit. The
 three packages, plus an empty window that closes cleanly.
@@ -81,13 +81,59 @@ that can be shut down cleanly.
 and a start/stop control. Every access from the sensor thread goes through `Platform.runLater(…)`
 — that bridge between threads is what this stage is really about.
 
-*Currently:* the window, the display and the controls are in place; the reading is still static.
-The subscription and the thread bridge are what remains.
+The written acceptance list was walked through by hand on 2026-09-04 and passed on all nine points,
+memory behaviour included: over ten minutes the heap climbed steadily without ever collecting, and
+a forced collection then dropped it below its own starting floor. A rising curve on a generously
+sized heap says nothing — only forced low points can be compared.
 
 **Stage 5 — Wrap-up.** README, a fresh clone that builds and runs with no extra steps, and an
 honest list of what was deliberately left open.
 
 Every stage ends in a presentable state. Whatever exists, runs; the tests are green.
+
+---
+
+## Acceptance
+
+There are **no automated UI tests** here. They would need their own tooling and a running window
+server, which is out of proportion to a window this size. In their place stands a written
+acceptance list of nine points, walked through by hand and recorded in the development plan.
+
+The last of those nine — *ten minutes of running, no growing memory* — turned out to be the one
+worth keeping.
+
+[<img src="docs/acceptance-heap.png" alt="Heap usage over twenty minutes, with two forced collections and one automatic collection marked by arrows">](docs/acceptance-heap.png)
+
+*Heap usage over roughly twenty minutes. **Green: a collection forced by hand. Red: one the JVM
+ran on its own.***
+
+For the first ten minutes the curve only climbs — 17 MB to 59 MB, not a sawtooth in sight. That
+looks like a leak and is not one. The heap here may grow to 8 GB, so the collector had no reason
+to act, and the counters confirm it barely did.
+
+The second forced collection drops the heap to 9 MB and shrinks the committed memory from 110 MB
+to 41 MB. That smaller heap is what makes the third valley possible: the young region now fills in
+minutes instead of a quarter of an hour, and at 17:11 the JVM collects **on its own**, down to
+10.5 MB. The two arrows also mark two different mechanisms — the forced ones are full collections,
+the automatic one is a young-generation collection, an ordinary tooth of the sawtooth we had been
+waiting for.
+
+Two floors, arrived at independently, minutes apart, at the same height. Nothing accumulates.
+
+Left running for another quarter of an hour, the picture becomes plain:
+
+[<img src="docs/acceptance-heap-30min.png" alt="Heap usage over thirty minutes: after the forced collection the curve settles into a repeating sawtooth between 10 and 22 MB">](docs/acceptance-heap-30min.png)
+
+*The same run, half an hour in. No arrows needed — everything after 17:06 is the JVM's own doing.*
+
+From there on it collects entirely by itself, roughly every five minutes: up to about 22 MB, down
+to about 10 MB, and again, and again. Three cycles, three floors, all at the same height — this is
+the sawtooth that was missing from the first ten minutes, and its shape is the whole answer. **A
+leak would lift the floor a little with every cycle.** This one does not move.
+
+What this really taught was how to read the instrument rather than the code: **on a generously
+sized heap, a rising curve says nothing.** Only low points can be compared — and one the runtime
+chose by itself is worth more than one squeezed out by hand.
 
 ---
 
@@ -135,8 +181,9 @@ gradlew test    # all tests
 gradlew run     # start the application
 ```
 
-`gradlew run` opens the window with its display and controls. The reading does not move yet —
-the bridge from the sensor thread to the interface is the remaining part of stage 4.
+`gradlew run` opens the window. Press **Start** and the reading updates twice a second; the status
+light turns amber once the value leaves the tolerance band around the target, and green again when
+it returns.
 
 ---
 

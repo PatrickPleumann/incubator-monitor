@@ -34,17 +34,18 @@
   <text x="120" y="224" fill="#7ee0d3" font-size="11">&#171;extends javafx.application.Application&#187;</text>
   <line x1="100" y1="234" x2="612" y2="234" stroke="#2c3644"/>
   <text x="120" y="254" fill="#9fb0c3" font-size="11">- WINDOW_TITLE : String &#183; WINDOW_WIDTH, WINDOW_HEIGHT : int</text>
-  <text x="120" y="272" fill="#9fb0c3" font-size="11.5">- monitorView : MonitorView</text>
+  <text x="120" y="272" fill="#9fb0c3" font-size="11.5">- monitorView : MonitorView &#183; subscription : Subscription</text>
   <text x="120" y="290" fill="#9fb0c3" font-size="11.5">- incubator : Incubator = new Incubator(37.0, 0.5)</text>
   <text x="120" y="308" fill="#9fb0c3" font-size="11.5">- sampler : TemperatureSampler &#183; 500 ms interval</text>
   <line x1="100" y1="318" x2="612" y2="318" stroke="#2c3644"/>
   <text x="120" y="338" fill="#9fb0c3" font-size="11.5">+ start(stage : Stage)</text>
-  <text x="120" y="356" fill="#9fb0c3" font-size="11.5">+ main(args : String[])</text>
+  <text x="120" y="356" fill="#9fb0c3" font-size="11.5">+ stop() &#183; main(args : String[])</text>
   <text x="120" y="374" fill="#9fb0c3" font-size="11.5">- toggleSimulation()</text>
   <text x="120" y="402" fill="#6e7d8d" font-size="11">the only place where interface and device meet</text>
   <text x="120" y="420" fill="#6e7d8d" font-size="11">creates both device objects and wires the view's callbacks</text>
   <text x="120" y="438" fill="#6e7d8d" font-size="11">at startup it calls setTemperature and setWithinTolerance once</text>
-  <text x="120" y="464" fill="#3ad4c4" font-size="11">no subscription yet &#8212; that is stage 4.2</text>
+  <text x="120" y="456" fill="#6e7d8d" font-size="11">every later update crosses to the FX thread via Platform.runLater</text>
+  <text x="120" y="476" fill="#3ad4c4" font-size="11">subscribes in start() &#183; stop() closes the subscription, then the sampler</text>
 
   <rect x="672" y="180" width="520" height="310" rx="8" fill="#161d26" stroke="#2c3644"/>
   <text x="692" y="206" fill="#e6edf3" font-size="14" font-weight="bold">MonitorView</text>

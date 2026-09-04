@@ -2,7 +2,7 @@
 
 [English](README.md) · **Deutsch**
 
-> **Stand: Etappe 4 von 5 in Arbeit** — 03.09.2026
+> **Stand: Etappen 1–4 fertig, Etappe 5 in Arbeit** — 04.09.2026
 
 Ein simuliertes Laborgerät in Java: ein CO₂-Inkubator, der Zellkulturen auf einer Zieltemperatur
 hält, seine Messwerte aus einem eigenen Thread meldet und von einer JavaFX-Oberfläche überwacht
@@ -61,8 +61,8 @@ wie der Code.
 | 1 | **Gerüst** | Gradle-Projekt, das startet und testet | ✅ fertig |
 | 2 | **Observer-Baukasten** | Ereignisse zustellen und abbestellen, getestet | ✅ fertig |
 | 3 | **Gerät und Nebenläufigkeit** | Ein Inkubator, der aus einem eigenen Thread meldet | ✅ fertig |
-| 4 | **Oberfläche** | JavaFX-Fenster, das Messwerte anzeigt | ⏳ in Arbeit |
-| 5 | **Abrunden** | README, frischer Klon, Grenzen benannt | ⬜ offen |
+| 4 | **Oberfläche** | JavaFX-Fenster, das Messwerte anzeigt | ✅ fertig |
+| 5 | **Abrunden** | README, frischer Klon, Grenzen benannt | ⏳ in Arbeit |
 
 **Etappe 1 — Gerüst.** Gradle mit Kotlin-DSL, Java-21-Toolchain, JavaFX und JUnit. Die drei Pakete
 und ein leeres Fenster, das sich sauber schließt.
@@ -82,13 +82,64 @@ Zeitgeber, der sich sauber beenden lässt.
 Start/Stopp. Jeder Zugriff aus dem Sensor-Thread läuft über `Platform.runLater(…)` — die Brücke
 zwischen den Threads ist der eigentliche Inhalt dieser Etappe.
 
-*Zurzeit:* Fenster, Anzeige und Bedienelemente stehen; der Messwert bewegt sich noch nicht.
-Was fehlt, ist das Abo und die Brücke zwischen den Threads.
+Die schriftliche Abnahmeliste wurde am 04.09.2026 von Hand durchgegangen und in allen neun Punkten
+bestanden, das Speicherverhalten eingeschlossen: Über zehn Minuten stieg der Heap durchgehend an,
+ohne ein einziges Mal aufzuräumen; ein erzwungenes Aufräumen ließ ihn danach unter seinen eigenen
+Ausgangswert fallen. Eine steigende Kurve sagt bei großzügigem Heap nichts — vergleichbar sind nur
+erzwungene Tiefpunkte.
 
 **Etappe 5 — Abrunden.** README, ein frischer Klon, der ohne Nacharbeit baut und startet, und eine
 ehrliche Liste dessen, was bewusst offen blieb.
 
 Jede Etappe endet in einem vorzeigbaren Zustand. Was da ist, läuft; die Tests sind grün.
+
+---
+
+## Abnahme
+
+Es gibt hier **keine automatisierten UI-Tests**. Sie bräuchten eigenes Werkzeug und einen
+laufenden Fenster-Server — unverhältnismäßig für ein Fenster dieser Größe. An ihrer Stelle steht
+eine schriftliche Abnahmeliste aus neun Punkten, von Hand durchgegangen und im Entwicklungsplan
+festgehalten.
+
+Der letzte dieser neun — *zehn Minuten laufen lassen, keine wachsende Speicherlast* — war der
+einzige, der es wert war, aufgehoben zu werden.
+
+[<img src="docs/acceptance-heap.png" alt="Heap-Nutzung über zwanzig Minuten, mit Pfeilen an zwei erzwungenen und einer automatischen Aufräumaktion">](docs/acceptance-heap.png)
+
+*Heap-Nutzung über gut zwanzig Minuten. **Grün: von Hand erzwungenes Aufräumen. Rot: eines, das
+die JVM von selbst ausgelöst hat.***
+
+Die ersten zehn Minuten steigt die Kurve nur — von 17 auf 59 MB, kein Sägezahn weit und breit. Das
+sieht nach einem Leck aus und ist keins: Der Heap darf hier bis 8 GB wachsen, also hatte der
+Aufräumer keinen Anlass, tätig zu werden, und laut Zählern war er es auch kaum.
+
+Das zweite erzwungene Aufräumen lässt den Heap auf 9 MB fallen und den festgeschriebenen Speicher
+von 110 auf 41 MB schrumpfen. Erst dieser kleinere Heap macht das dritte Tal möglich: Der
+Jungbereich füllt sich jetzt in Minuten statt in einer Viertelstunde, und um 17:11 räumt die JVM
+**von selbst** auf, bis auf 10,5 MB. Die Pfeile markieren dabei zwei verschiedene Mechanismen — die
+erzwungenen sind vollständige Sammlungen, die automatische ist eine Sammlung im Jungbereich, also
+ein gewöhnlicher Zacken des Sägezahns, auf den wir gewartet hatten.
+
+Zwei Tiefpunkte, unabhängig voneinander zustande gekommen, Minuten auseinander, auf gleicher Höhe.
+Es bleibt nichts liegen.
+
+Lässt man das Ganze noch eine Viertelstunde weiterlaufen, wird das Bild eindeutig:
+
+[<img src="docs/acceptance-heap-30min.png" alt="Heap-Nutzung über dreißig Minuten: nach dem erzwungenen Aufräumen pendelt sich die Kurve auf einen wiederkehrenden Sägezahn zwischen 10 und 22 MB ein">](docs/acceptance-heap-30min.png)
+
+*Derselbe Durchlauf nach einer halben Stunde. Keine Pfeile nötig — alles ab 17:06 macht die JVM
+von allein.*
+
+Von da an räumt sie vollständig selbstständig auf, ungefähr alle fünf Minuten: hoch auf rund
+22 MB, runter auf rund 10 MB, und wieder, und wieder. Drei Zyklen, drei Tiefpunkte, alle auf
+derselben Höhe — das ist der Sägezahn, der in den ersten zehn Minuten gefehlt hat, und seine Form
+ist die ganze Antwort. **Ein Leck würde den Boden mit jedem Zyklus ein Stück anheben.** Dieser
+rührt sich nicht.
+
+Gelernt wurde dabei weniger über den Code als über das Messwerkzeug: **Bei großzügigem Heap sagt
+eine steigende Kurve nichts.** Vergleichbar sind nur Tiefpunkte — und einer, den die Laufzeit
+selbst gewählt hat, ist mehr wert als einer, den man herausgequetscht hat.
 
 ---
 
@@ -136,8 +187,9 @@ gradlew test    # alle Tests
 gradlew run     # Anwendung starten
 ```
 
-`gradlew run` öffnet das Fenster mit Anzeige und Bedienelementen. Der Messwert bewegt sich noch
-nicht — die Brücke vom Sensor-Thread zur Oberfläche ist der Rest von Etappe 4.
+`gradlew run` öffnet das Fenster. Nach einem Druck auf **Start** aktualisiert sich der Messwert
+zweimal pro Sekunde; die Statusanzeige wechselt auf Bernstein, sobald der Wert das Toleranzband um
+den Sollwert verlässt, und zurück auf Grün, sobald er es wieder erreicht.
 
 ---
 

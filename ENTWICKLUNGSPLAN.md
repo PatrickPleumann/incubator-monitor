@@ -88,7 +88,7 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **Aufgabe 4.1 abgeschlossen** (03.09.2026). Die Liste zeigt den Stand
+Stand: **Etappe 4 vollständig abgeschlossen** (04.09.2026). Die Liste zeigt den Stand
 der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
@@ -112,8 +112,8 @@ der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 4 — Oberfläche**
 - [x] 4.1 Aufbau — U-1 bis U-6, `MonitorView` als eigene Klasse, Verdrahtung über Rückrufe in `IncubatorMonitorApp`
-- [ ] 4.2 Thread-Brücke (U-7 bis U-9)
-- [ ] 4.3 Abnahmeliste von Hand durchgegangen
+- [x] 4.2 Thread-Brücke — U-7 bis U-9, Aufräumen in `Application.stop()` (siehe Änderungsprotokoll)
+- [x] 4.3 Abnahmeliste von Hand durchgegangen — alle neun Punkte bestanden (siehe Review-Protokoll)
 
 **Etappe 5 — Abrunden**
 - [ ] 5.1 README überarbeiten (Grundfassung steht seit 01.09.2026)
@@ -572,16 +572,16 @@ und Schaltflächen.
 
 Diese Liste wird einmal durchgegangen und das Ergebnis unten im Protokoll vermerkt.
 
-- [ ] Fenster startet mit `gradlew run`.
-- [ ] Ohne gestartete Simulation steht ein sinnvoller Anfangswert da, keine Platzhalter.
-- [ ] Start: Der Wert ändert sich im Takt, ohne Ruckeln, ohne Ausnahme in der Konsole.
-- [ ] Sollwert ändern: Der Wert wandert erkennbar zum neuen Sollwert.
-- [ ] Statusfarbe wechselt beim Verlassen und Wiedererreichen der Toleranz.
-- [ ] Ungültige Eingabe (`abc`, leer, `-40`): Feld markiert, sonst passiert nichts.
-- [ ] Stopp: Der Wert steht still.
-- [ ] Fenster schließen bei laufender Simulation: Der Prozess endet wirklich (im Task-Manager
+- [x] Fenster startet mit `gradlew run`.
+- [x] Ohne gestartete Simulation steht ein sinnvoller Anfangswert da, keine Platzhalter.
+- [x] Start: Der Wert ändert sich im Takt, ohne Ruckeln, ohne Ausnahme in der Konsole.
+- [x] Sollwert ändern: Der Wert wandert erkennbar zum neuen Sollwert.
+- [x] Statusfarbe wechselt beim Verlassen und Wiedererreichen der Toleranz.
+- [x] Ungültige Eingabe (`abc`, leer, `-40`): Feld markiert, sonst passiert nichts.
+- [x] Stopp: Der Wert steht still.
+- [x] Fenster schließen bei laufender Simulation: Der Prozess endet wirklich (im Task-Manager
       prüfen), keine Ausnahme beim Herunterfahren.
-- [ ] Zehn Minuten laufen lassen: keine wachsende Speicherlast, keine Ausnahme.
+- [x] Zehn Minuten laufen lassen: keine wachsende Speicherlast, keine Ausnahme.
 
 ---
 
@@ -645,7 +645,7 @@ kam wann, was wurde daraus, und **was wurde bewusst nicht übernommen**.
 
 | Datum | Etappe | Befund | Entscheidung |
 |---|---|---|---|
-| — | — | *noch kein Review* | — |
+| 04.09.2026 | 4 | Abnahmeliste 4.3 vollständig von Hand durchgegangen. Acht Punkte ohne Auffälligkeit. Beim Speicher-Punkt zeigte die Heap-Kurve über zehn Minuten eine reine Treppe nach oben (17 → 59 MB), ohne jeden Einbruch — der erwartete Sägezahn fehlte vollständig. | **Kein Befund.** Ursache war der Heap von 8 GB: G1 hatte in zehn Minuten nur zwei Young- und eine Old-Sammlung nötig, räumte also faktisch gar nicht auf. Nach erzwungenem „GC ausführen" fiel der Wert auf 9 MB — also **unter** den ersten Boden von 17 MB —, der zugesicherte Speicher von 110 auf 41 MB. Es bleibt nichts liegen. Nachtrag um 17:11 Uhr: Die JVM räumte danach **von selbst** auf, bis auf 10,5 MB — ein zweiter, unabhängig entstandener Tiefpunkt auf gleicher Höhe. Merksatz: Bei großzügigem Heap sagt eine steigende Kurve nichts; verglichen werden ausschließlich Tiefpunkte, und ein selbst gewählter wiegt schwerer als ein erzwungener. Belege: `docs/acceptance-heap.png` (grün = erzwungen, rot = automatisch) und `docs/acceptance-heap-30min.png` — dort räumt die JVM über eine halbe Stunde dreimal von selbst auf, jedes Mal auf denselben Boden von rund 10 MB. Ein Leck würde diesen Boden mit jedem Zyklus anheben. |
 
 ---
 
@@ -677,3 +677,4 @@ umgehen ist der einzige Fehler, den man dabei machen kann.
 | 03.09.2026 | `MonitorView` kennt den `Incubator` nicht; Eingaben laufen über Rückrufe | Für den Sollwert und den Start/Stopp-Knopf muss die Wirkung von der Oberfläche zum Gerät. Statt der View den `Incubator` in den Konstruktor zu geben, bietet sie `setOnTargetSubmitted(DoubleConsumer)` und `setOnSimulationToggled(Runnable)` an; verdrahtet wird in der App. Die View bekommt damit weiterhin nur Zahlen und Wahrheitswerte und bleibt austauschbar. Die Bereichsprüfung 0–100 bleibt im Gerät — die Oberfläche fängt die `IllegalArgumentException` und färbt das Feld rot (U-5), statt die Regel zu wiederholen. |
 | 03.09.2026 | Temperaturanzeige mit `Locale.ROOT` formatiert | `String.format("%.2f")` nimmt sonst die Systemsprache und zeigt `37,00` mit Komma, während `Double.parseDouble` im Eingabefeld nur den Punkt akzeptiert. Der Benutzer hätte nicht eintippen können, was direkt darüber steht. Da die Oberfläche durchgehend englisch beschriftet ist, ist die neutrale Darstellung mit Punkt die passende Seite des Widerspruchs. |
 | 04.09.2026 | Zwei Diagramme unter `docs/` angelegt und in beiden READMEs verlinkt | Der Plan sieht keine Diagramme vor. Beide beantworten aber Fragen, die der Fließtext nur umständlich beantwortet: `flow-reading-path.svg` zeigt den Weg eines Messwerts samt Sperrbereich, Abbruchstellen und Thread-Grenze, `class-diagram.svg` alle Typen der drei Pakete und wer wen kennt. Handgeschriebenes SVG statt eines Werkzeugs — kein Build-Schritt, keine Fremdbibliothek, und GitHub stellt die Dateien ohne Zutun dar. Aufgabe 5.1 prüft am Ende, ob beide noch zum Code passen. |
+| 04.09.2026 | Aufräumen in `Application.stop()` statt in `stage.setOnCloseRequest(...)` (Aufgabe 4.2, Tipp 3) | Der Plan nannte `setOnCloseRequest`. Das feuert nur, wenn der Benutzer genau dieses Fenster schließt — nicht bei `Platform.exit()` —, und ein anderer Handler kann das Ereignis abfangen, dann läuft das Aufräumen nie. `stop()` ruft die JavaFX-Laufzeit beim Herunterfahren in jedem Fall auf und ist das Gegenstück zu `start()`: aufgeräumt wird dort, wo auch aufgebaut wurde. Reihenfolge im Rumpf: erst `subscription.close()`, dann `sampler.close()` — andersherum könnte der Sampler in der Sekunde, die sein `close()` auf das Herunterfahren wartet, noch Ereignisse an eine Oberfläche schicken, die gerade verschwindet. |

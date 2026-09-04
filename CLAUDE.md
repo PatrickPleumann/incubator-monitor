@@ -84,6 +84,8 @@ Diese sind getroffen und werden nicht ohne Anlass neu aufgerollt:
 | **Oberfläche in zwei Klassen** | `IncubatorMonitorApp` hält Lebenszyklus und Verdrahtung, `MonitorView` baut die Elemente. Eine Klasse hätte drei Aufgaben vermischt; getrennt sitzt die Thread-Brücke an zwei Methoden statt verstreut im Layout-Code. |
 | **`MonitorView` kennt den `Incubator` nicht** | Sie bekommt Zahlen und Wahrheitswerte; Eingaben meldet sie über `DoubleConsumer` bzw. `Runnable` nach oben, verdrahtet wird in der App. Damit gilt die Abhängigkeitsrichtung auch innerhalb von `ui`, und die Bereichsprüfung 0–100 bleibt allein im Gerät: Die Oberfläche fängt dessen `IllegalArgumentException` und färbt das Feld rot, statt die Regel zu wiederholen. |
 | **Anzeige mit `Locale.ROOT`** | `%.2f` zeigt sonst je nach Systemsprache ein Komma, während `Double.parseDouble` im Eingabefeld nur den Punkt akzeptiert — man könnte nicht eintippen, was direkt darüber steht. Die Oberfläche ist durchgehend englisch beschriftet, also ist der Punkt die passende Seite des Widerspruchs. |
+| **Gerätewerte vor `Platform.runLater` einsammeln** | Im Listener wird gelesen, im Block darin nur noch angezeigt. Ein `isWithinTolerance()` *innerhalb* des Blocks liefe erst auf dem FX-Thread und könnte zu einer neueren Messung gehören als die Zahl daneben — Wert und Farbe kämen aus zwei Momenten. Beide Aktualisierungen stehen deshalb in **einem** `runLater`: zwei Aufrufe wären zwei Einträge in der Warteschlange, zwischen denen gezeichnet werden kann. |
+| **Aufräumen in `Application.stop()`** | Gegenstück zu `start()`, und die JavaFX-Laufzeit ruft es beim Herunterfahren in jedem Fall auf. `stage.setOnCloseRequest(…)` feuert nur beim Zuklicken dieses einen Fensters, nicht bei `Platform.exit()`, und ein anderer Handler kann es abfangen. Reihenfolge im Rumpf: erst `subscription.close()`, dann `sampler.close()` — andersherum könnte der Sampler während der Wartezeit seines `close()` noch an eine verschwindende Oberfläche melden. |
 
 ## Umfangsgrenzen
 
@@ -130,6 +132,13 @@ erklärbar sein — nicht nur funktionieren.
 - `Subscription` ist dasselbe Muster wie RAII in C++ und `IDisposable` in C#. Der Unterschied:
   Java stößt es explizit an (`close()` bzw. try-with-resources), weil der Garbage Collector keinen
   definierten Zeitpunkt hat.
+- Eine steigende Heap-Kurve ist **kein** Leck. Bei großzügigem Heap räumt der Aufräumer kaum auf,
+  weil kein Anlass besteht — verglichen werden ausschließlich die Tiefpunkte nach einem erzwungenen
+  Aufräumen. Gemessen am 04.09.2026: Boden 17 MB, danach zehn Minuten Treppe bis 59 MB, nach
+  erzwungenem Aufräumen 9 MB — und, nachdem der erzwungene Durchlauf den Heap von 110 auf 41 MB
+  verkleinert hatte, ein **selbst ausgelöstes** Aufräumen auf 10,5 MB. Ein Tiefpunkt, den die
+  Laufzeit von sich aus wählt, wiegt schwerer als ein herausgequetschter. Beleg:
+  `docs/acceptance-heap.png`.
 - `AutoCloseable.close()` ohne `throws` neu deklarieren — sonst erzwingt die geprüfte Ausnahme ein
   `catch` bei jedem Aufrufer.
 
@@ -137,6 +146,10 @@ erklärbar sein — nicht nur funktionieren.
 - `==` ist bei Objekten **immer** Referenzvergleich; es gibt kein Operator-Overloading. Wer
   `equals` überschreibt, überschreibt `hashCode` mit.
 - Geprüfte vs. ungeprüfte Ausnahmen (`Exception` vs. `RuntimeException`).
+- Eine überschreibende Methode darf **weniger** geprüfte Ausnahmen ankündigen als die
+  überschriebene, nie mehr. Deshalb ist `stop()` ohne `throws Exception` erlaubt, obwohl
+  `Application.stop()` es deklariert. In C# stellt sich die Frage nicht — dort gibt es keine
+  geprüften Ausnahmen.
 - Type Erasure: Generics verschwinden zur Laufzeit. Kein `new T[]`, kein `instanceof List<String>`.
 - Lambdas erfassen nur effektiv finale Variablen.
 - Wildcards an der Verwendungsstelle (`? super T`) statt Varianz an der Deklaration (`in`/`out`).
@@ -145,6 +158,12 @@ erklärbar sein — nicht nur funktionieren.
 - Der JavaFX Application Thread ist das Gegenstück zum WPF-Dispatcher. `Platform.runLater(…)`
   entspricht `Dispatcher.BeginInvoke()`.
 - Layout über `BorderPane`/`VBox`/`GridPane` — nicht über `FlowPane`.
+- Alles, was aus dem Gerät kommt, wird **vor** `Platform.runLater(…)` gelesen. Der Block darin
+  läuft später; ein lebendes Objekt beantwortet eine Frage mit dem Jetzt, ein `record` dagegen
+  trägt den eingefrorenen Wert von damals.
+- Zusammengehörige Aktualisierungen gehören in **einen** `runLater`-Block, sonst kann die
+  Oberfläche zwischen ihnen zeichnen und zeigt für einen Moment Widersprüchliches.
+- `Application.stop()` ist der verlässliche Ort zum Aufräumen, nicht `setOnCloseRequest(…)`.
 
 ---
 
