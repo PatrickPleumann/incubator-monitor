@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1330" viewBox="0 0 1240 1330" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#8b98a5"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#ff7d00"/>
+    </marker>
+  </defs>
+
+  <rect width="1240" height="1330" fill="#0f141a"/>
+
+  <text x="92" y="40" fill="#e6edf3" font-size="23" font-weight="bold">The path of a reading</text>
+  <text x="92" y="64" fill="#8b98a5" font-size="13">from the sampler thread to the JavaFX interface &#183; incubator-monitor</text>
+
+  <rect x="792" y="16" width="420" height="104" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="812" y="40" fill="#e6edf3" font-size="13" font-weight="bold">Legend</text>
+  <line x1="814" y1="58" x2="852" y2="58" stroke="#8b98a5" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="872" y="62" fill="#9fb0c3" font-size="12">the path the data takes</text>
+  <line x1="814" y1="80" x2="852" y2="80" stroke="#ff7d00" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrowOrange)"/>
+  <text x="872" y="84" fill="#9fb0c3" font-size="12">abort &#183; the call ends here</text>
+  <rect x="814" y="94" width="38" height="14" rx="4" fill="#0e2a2a" stroke="#3ad4c4"/>
+  <text x="872" y="106" fill="#9fb0c3" font-size="12">invariant &#183; the reason it is safe</text>
+
+  <line x1="62" y1="150" x2="62" y2="266" stroke="#7d5bd6" stroke-width="3"/>
+  <text transform="translate(44,208) rotate(-90)" text-anchor="middle" fill="#b79bff" font-size="12" letter-spacing="2">0 &#183; FX THREAD</text>
+  <line x1="62" y1="300" x2="62" y2="424" stroke="#3c1192" stroke-width="3"/>
+  <text transform="translate(44,362) rotate(-90)" text-anchor="middle" fill="#7ee0d3" font-size="12" letter-spacing="2">1 &#183; SAMPLER</text>
+  <line x1="62" y1="456" x2="62" y2="620" stroke="#3c1192" stroke-width="3"/>
+  <text transform="translate(44,538) rotate(-90)" text-anchor="middle" fill="#7ee0d3" font-size="12" letter-spacing="2">2 &#183; DEVICE</text>
+  <line x1="62" y1="686" x2="62" y2="828" stroke="#3c1192" stroke-width="3"/>
+  <text transform="translate(44,757) rotate(-90)" text-anchor="middle" fill="#7ee0d3" font-size="12" letter-spacing="2">3 &#183; EVENTS</text>
+  <line x1="62" y1="860" x2="62" y2="966" stroke="#ff7d00" stroke-width="3"/>
+  <text transform="translate(44,913) rotate(-90)" text-anchor="middle" fill="#ffb066" font-size="12" letter-spacing="2">4 &#183; BOUNDARY</text>
+  <line x1="62" y1="998" x2="62" y2="1104" stroke="#7d5bd6" stroke-width="3"/>
+  <text transform="translate(44,1051) rotate(-90)" text-anchor="middle" fill="#b79bff" font-size="12" letter-spacing="2">5 &#183; FX THREAD</text>
+
+  <rect x="92" y="150" width="660" height="116" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="112" y="178" fill="#e6edf3" font-size="14" font-weight="bold">TemperatureSampler.start()</text>
+  <text x="112" y="200" fill="#b79bff" font-size="11.5">reached from the Start button, so this runs on the FX thread</text>
+  <text x="112" y="224" fill="#9fb0c3" font-size="12.5">ScheduledExecutorService &#183; one daemon thread &#183; "temperature-sampler"</text>
+  <text x="112" y="245" fill="#9fb0c3" font-size="12">scheduleWithFixedDelay(task, 0, interval.toMillis(), MILLISECONDS)</text>
+  <text x="112" y="261" fill="#6e7d8d" font-size="11">the application passes 500 ms</text>
+
+  <rect x="792" y="150" width="420" height="116" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="812" y="176" fill="#e6edf3" font-size="13" font-weight="bold">Why fixed delay, not fixed rate</text>
+  <text x="812" y="200" fill="#9fb0c3" font-size="11.5">scheduleAtFixedRate catches up on missed runs.</text>
+  <text x="812" y="219" fill="#9fb0c3" font-size="11.5">A late reading is worthless, and catching up would</text>
+  <text x="812" y="238" fill="#9fb0c3" font-size="11.5">only pile more work on a listener that is already</text>
+  <text x="812" y="257" fill="#9fb0c3" font-size="11.5">too slow.</text>
+
+  <line x1="422" y1="266" x2="422" y2="298" stroke="#8b98a5" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="436" y="288" fill="#7ee0d3" font-size="11">from here on, everything runs on the sampler thread</text>
+
+  <rect x="92" y="300" width="660" height="124" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="112" y="328" fill="#e6edf3" font-size="14" font-weight="bold">measurement task &#8212; one run per tick</text>
+  <text x="112" y="354" fill="#9fb0c3" font-size="12.5">current = incubator.getCurrentTemperature()</text>
+  <text x="112" y="376" fill="#9fb0c3" font-size="12">next    = source.nextTemperature(current, incubator.getTargetTemperature())</text>
+  <text x="112" y="398" fill="#9fb0c3" font-size="12.5">incubator.updateTemperature(next)</text>
+  <text x="112" y="416" fill="#6e7d8d" font-size="11">the source computes the value; it keeps no state and reads no clock</text>
+
+  <line x1="752" y1="340" x2="788" y2="340" stroke="#ff7d00" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrowOrange)"/>
+  <rect x="792" y="300" width="420" height="96" rx="8" fill="#241a12" stroke="#ff7d00" stroke-dasharray="5 4"/>
+  <text x="812" y="326" fill="#ffb066" font-size="13" font-weight="bold">RuntimeException &#8594; printStackTrace()</text>
+  <text x="812" y="350" fill="#c9a184" font-size="11.5">The task carries its own try/catch. Without it the whole</text>
+  <text x="812" y="369" fill="#c9a184" font-size="11.5">series would end &#8212; silently, because the failure lands</text>
+  <text x="812" y="386" fill="#c9a184" font-size="11.5">in a Future that nobody ever reads.</text>
+
+  <line x1="422" y1="424" x2="422" y2="454" stroke="#8b98a5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="92" y="456" width="660" height="164" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="112" y="484" fill="#e6edf3" font-size="14" font-weight="bold">Incubator.updateTemperature(celsius)</text>
+  <text x="112" y="510" fill="#9fb0c3" font-size="12.5">synchronized (threadLock)</text>
+  <text x="132" y="532" fill="#9fb0c3" font-size="12.5">|celsius &#8722; measured| &#8804; 0.001  &#8594;  return</text>
+  <text x="132" y="554" fill="#9fb0c3" font-size="12.5">previous = measured ; measured = celsius</text>
+  <text x="132" y="576" fill="#9fb0c3" font-size="12.5">event = new TemperatureChangedEvent(previous, measured)</text>
+  <text x="112" y="604" fill="#7ee0d3" font-size="12.5">eventSupport.fire(event)   &#8592; outside the lock</text>
+
+  <line x1="752" y1="532" x2="788" y2="532" stroke="#ff7d00" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrowOrange)"/>
+  <rect x="792" y="496" width="420" height="76" rx="8" fill="#241a12" stroke="#ff7d00" stroke-dasharray="5 4"/>
+  <text x="812" y="522" fill="#ffb066" font-size="13" font-weight="bold">change too small &#8594; return</text>
+  <text x="812" y="546" fill="#c9a184" font-size="11.5">No event is built and no listener is called when the</text>
+  <text x="812" y="564" fill="#c9a184" font-size="11.5">value has not really moved.</text>
+
+  <rect x="792" y="586" width="420" height="114" rx="8" fill="#0e2a2a" stroke="#3ad4c4"/>
+  <text x="812" y="612" fill="#7ee0d3" font-size="13" font-weight="bold">Invariant &#183; fire() never runs under the lock</text>
+  <text x="812" y="636" fill="#a8ccc7" font-size="11.5">The event is built inside the guarded block and sent</text>
+  <text x="812" y="655" fill="#a8ccc7" font-size="11.5">outside it. Foreign listener code must never execute</text>
+  <text x="812" y="674" fill="#a8ccc7" font-size="11.5">while this object holds its own lock &#8212; that is how</text>
+  <text x="812" y="691" fill="#a8ccc7" font-size="11.5">a deadlock is built.</text>
+
+  <line x1="422" y1="620" x2="422" y2="684" stroke="#8b98a5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="92" y="686" width="660" height="142" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="112" y="714" fill="#e6edf3" font-size="14" font-weight="bold">EventSupport&#60;TemperatureChangedEvent&#62;.fire(event)</text>
+  <text x="112" y="740" fill="#9fb0c3" font-size="12">for (Registration registration : listeners)   // CopyOnWriteArrayList</text>
+  <text x="132" y="762" fill="#9fb0c3" font-size="12">registration.consumer.accept(event)</text>
+  <text x="132" y="784" fill="#9fb0c3" font-size="12">catch RuntimeException &#8594; errorHandler.accept(ex)</text>
+  <text x="112" y="810" fill="#6e7d8d" font-size="11">the catch sits inside the loop, so one failing listener does not stop the others</text>
+
+  <rect x="792" y="714" width="420" height="98" rx="8" fill="#0e2a2a" stroke="#3ad4c4"/>
+  <text x="812" y="740" fill="#7ee0d3" font-size="13" font-weight="bold">Invariant &#183; safe iteration</text>
+  <text x="812" y="764" fill="#a8ccc7" font-size="11.5">A listener may cancel its own subscription while fire()</text>
+  <text x="812" y="783" fill="#a8ccc7" font-size="11.5">is still walking the list. Copy-on-write iterates over a</text>
+  <text x="812" y="802" fill="#a8ccc7" font-size="11.5">snapshot, so the removal cannot disturb this loop.</text>
+
+  <line x1="422" y1="828" x2="422" y2="858" stroke="#8b98a5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="92" y="860" width="660" height="106" rx="8" fill="#141b22" stroke="#ff7d00" stroke-dasharray="7 5"/>
+  <text x="112" y="888" fill="#ffb066" font-size="14" font-weight="bold">Platform.runLater( &#8230; )   &#8212;   stage 4.2, not built yet</text>
+  <text x="112" y="912" fill="#9fb0c3" font-size="12">a listener on incubator.temperatureChanged() will hand the value over</text>
+  <text x="112" y="934" fill="#9fb0c3" font-size="12">to view.setTemperature and view.setWithinTolerance</text>
+  <text x="112" y="955" fill="#c9a184" font-size="11.5">today the application registers no listener at all &#8212; only the tests do</text>
+
+  <rect x="792" y="856" width="420" height="114" rx="8" fill="#0e2a2a" stroke="#3ad4c4"/>
+  <text x="812" y="882" fill="#7ee0d3" font-size="13" font-weight="bold">Invariant &#183; the one rule of stage 4</text>
+  <text x="812" y="906" fill="#a8ccc7" font-size="11.5">Lanes 1 to 3 run on the sampler thread, lane 5 on the</text>
+  <text x="812" y="925" fill="#a8ccc7" font-size="11.5">FX thread. Every touch of a JavaFX node has to cross</text>
+  <text x="812" y="944" fill="#a8ccc7" font-size="11.5">here. Direct access throws IllegalStateException:</text>
+  <text x="812" y="961" fill="#a8ccc7" font-size="11.5">Not on FX application thread.</text>
+
+  <line x1="422" y1="966" x2="422" y2="996" stroke="#8b98a5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="92" y="998" width="660" height="106" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="112" y="1026" fill="#e6edf3" font-size="14" font-weight="bold">MonitorView &#8212; on the JavaFX application thread</text>
+  <text x="112" y="1052" fill="#9fb0c3" font-size="12.5">setTemperature(double)      &#8594; label text, formatted with Locale.ROOT</text>
+  <text x="112" y="1074" fill="#9fb0c3" font-size="12.5">setWithinTolerance(boolean) &#8594; dot colour and status text</text>
+  <text x="112" y="1094" fill="#6e7d8d" font-size="11">the view is told what to show; it never asks the device</text>
+
+  <rect x="792" y="998" width="420" height="106" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="812" y="1024" fill="#e6edf3" font-size="13" font-weight="bold">What already happens today</text>
+  <text x="812" y="1048" fill="#9fb0c3" font-size="11.5">IncubatorMonitorApp.start() calls both setters once,</text>
+  <text x="812" y="1067" fill="#9fb0c3" font-size="11.5">directly on the FX thread. That is why the window</text>
+  <text x="812" y="1086" fill="#9fb0c3" font-size="11.5">shows 37.00 &#176;C and a green dot before anything runs.</text>
+
+  <line x1="92" y1="1146" x2="1212" y2="1146" stroke="#2c3644"/>
+  <text x="92" y="1176" fill="#e6edf3" font-size="16" font-weight="bold">The way back &#8212; interface to device</text>
+
+  <rect x="92" y="1192" width="660" height="116" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="112" y="1220" fill="#e6edf3" font-size="13.5" font-weight="bold">MonitorView &#8594; IncubatorMonitorApp &#8594; device</text>
+  <text x="112" y="1246" fill="#9fb0c3" font-size="11.5">Apply button &#8594; submitTarget() &#8212;DoubleConsumer&#8594; incubator.setTargetTemperature</text>
+  <text x="112" y="1268" fill="#9fb0c3" font-size="11.5">Stop / Start &#8594; handler.run() &#8212;Runnable&#8594; toggleSimulation() &#8594; sampler.stop() / start()</text>
+  <text x="112" y="1294" fill="#6e7d8d" font-size="11">the button label is then rewritten from sampler.isRunning(), never from a remembered flag</text>
+
+  <rect x="792" y="1192" width="420" height="116" rx="8" fill="#0e2a2a" stroke="#3ad4c4"/>
+  <text x="812" y="1218" fill="#7ee0d3" font-size="13" font-weight="bold">Invariant &#183; the view knows no device</text>
+  <text x="812" y="1242" fill="#a8ccc7" font-size="11.5">It receives numbers and booleans and reports input</text>
+  <text x="812" y="1261" fill="#a8ccc7" font-size="11.5">through callbacks. The range check 0&#8211;100 stays in the</text>
+  <text x="812" y="1280" fill="#a8ccc7" font-size="11.5">Incubator; the view catches its IllegalArgumentException</text>
+  <text x="812" y="1299" fill="#a8ccc7" font-size="11.5">and marks the field red instead of repeating the rule.</text>
+</svg>

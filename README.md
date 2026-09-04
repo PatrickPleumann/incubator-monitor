@@ -42,6 +42,17 @@ screen, and why the interface could be replaced without touching the device logi
 
 ---
 
+## Diagrams
+
+Click either one to open it full size.
+
+| [**The path of a reading**](docs/flow-reading-path.svg) | [**Types and their dependencies**](docs/class-diagram.svg) |
+|:--|:--|
+| [<img src="docs/flow-reading-path.svg" width="420" alt="Flow: how a reading travels from the sampler thread to the interface">](docs/flow-reading-path.svg) | [<img src="docs/class-diagram.svg" width="420" alt="Class diagram of the three packages">](docs/class-diagram.svg) |
+| What happens on every tick — where the value is guarded by a lock, where a call is abandoned, and where the thread boundary sits. | Every type in the three packages, its fields and methods, and which of them knows which. |
+
+---
+
 ## The five stages
 
 | # | Stage | Result | Status |

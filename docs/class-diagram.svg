@@ -1,0 +1,235 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1700" viewBox="0 0 1240 1700" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">
+  <defs>
+    <marker id="solid" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#8b98a5"/>
+    </marker>
+    <marker id="hollow" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
+      <path d="M0,0 L12,5 L0,10 z" fill="#0f141a" stroke="#7ee0d3"/>
+    </marker>
+    <marker id="violet" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
+      <path d="M0,0 L12,5 L0,10 z" fill="#7d5bd6"/>
+    </marker>
+  </defs>
+
+  <rect width="1240" height="1700" fill="#0f141a"/>
+
+  <text x="76" y="40" fill="#e6edf3" font-size="23" font-weight="bold">Types and their dependencies</text>
+  <text x="76" y="64" fill="#8b98a5" font-size="13">every type in the project &#183; dependencies point downwards only &#183; incubator-monitor</text>
+
+  <rect x="792" y="16" width="420" height="98" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="812" y="40" fill="#e6edf3" font-size="13" font-weight="bold">Legend</text>
+  <line x1="814" y1="58" x2="852" y2="58" stroke="#8b98a5" stroke-width="2" marker-end="url(#solid)"/>
+  <text x="872" y="62" fill="#9fb0c3" font-size="12">holds a reference / calls</text>
+  <line x1="814" y1="80" x2="850" y2="80" stroke="#7ee0d3" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#hollow)"/>
+  <text x="872" y="84" fill="#9fb0c3" font-size="12">implements</text>
+  <line x1="814" y1="100" x2="852" y2="100" stroke="#7d5bd6" stroke-width="3" marker-end="url(#violet)"/>
+  <text x="872" y="104" fill="#9fb0c3" font-size="12">package depends on package</text>
+
+  <!-- ================= package ui ================= -->
+  <rect x="76" y="140" width="1136" height="366" rx="10" fill="#12181f" stroke="#3c1192" stroke-width="2"/>
+  <text x="96" y="166" fill="#b79bff" font-size="13" font-weight="bold" letter-spacing="1">package ui &#8212; JavaFX. May know device and events.</text>
+
+  <rect x="100" y="180" width="512" height="310" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="120" y="206" fill="#e6edf3" font-size="14" font-weight="bold">IncubatorMonitorApp</text>
+  <text x="120" y="224" fill="#7ee0d3" font-size="11">&#171;extends javafx.application.Application&#187;</text>
+  <line x1="100" y1="234" x2="612" y2="234" stroke="#2c3644"/>
+  <text x="120" y="254" fill="#9fb0c3" font-size="11">- WINDOW_TITLE : String &#183; WINDOW_WIDTH, WINDOW_HEIGHT : int</text>
+  <text x="120" y="272" fill="#9fb0c3" font-size="11.5">- monitorView : MonitorView</text>
+  <text x="120" y="290" fill="#9fb0c3" font-size="11.5">- incubator : Incubator = new Incubator(37.0, 0.5)</text>
+  <text x="120" y="308" fill="#9fb0c3" font-size="11.5">- sampler : TemperatureSampler &#183; 500 ms interval</text>
+  <line x1="100" y1="318" x2="612" y2="318" stroke="#2c3644"/>
+  <text x="120" y="338" fill="#9fb0c3" font-size="11.5">+ start(stage : Stage)</text>
+  <text x="120" y="356" fill="#9fb0c3" font-size="11.5">+ main(args : String[])</text>
+  <text x="120" y="374" fill="#9fb0c3" font-size="11.5">- toggleSimulation()</text>
+  <text x="120" y="402" fill="#6e7d8d" font-size="11">the only place where interface and device meet</text>
+  <text x="120" y="420" fill="#6e7d8d" font-size="11">creates both device objects and wires the view's callbacks</text>
+  <text x="120" y="438" fill="#6e7d8d" font-size="11">at startup it calls setTemperature and setWithinTolerance once</text>
+  <text x="120" y="464" fill="#3ad4c4" font-size="11">no subscription yet &#8212; that is stage 4.2</text>
+
+  <rect x="672" y="180" width="520" height="310" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="692" y="206" fill="#e6edf3" font-size="14" font-weight="bold">MonitorView</text>
+  <line x1="672" y1="216" x2="1192" y2="216" stroke="#2c3644"/>
+  <text x="692" y="236" fill="#9fb0c3" font-size="11">- HEADER_TITLE, HEADER_COLOR : String &#183; STATUS_OK, STATUS_WARN : Color</text>
+  <text x="692" y="254" fill="#9fb0c3" font-size="11.5">- root : BorderPane &#183; statusDot : Circle</text>
+  <text x="692" y="272" fill="#9fb0c3" font-size="11">- temperatureLabel, statusLabel : Label &#183; targetField : TextField</text>
+  <text x="692" y="290" fill="#9fb0c3" font-size="11.5">- applyButton, simulationButton : Button</text>
+  <text x="692" y="308" fill="#9fb0c3" font-size="11.5">- targetSubmittedHandler : DoubleConsumer</text>
+  <text x="692" y="326" fill="#9fb0c3" font-size="11.5">- simulationToggleHandler : Runnable</text>
+  <line x1="672" y1="336" x2="1192" y2="336" stroke="#2c3644"/>
+  <text x="692" y="356" fill="#9fb0c3" font-size="11.5">+ MonitorView()</text>
+  <text x="692" y="374" fill="#9fb0c3" font-size="11.5">+ setTemperature(double) &#183; setWithinTolerance(boolean)</text>
+  <text x="692" y="392" fill="#9fb0c3" font-size="11.5">+ setSimulationRunning(boolean) &#183; getRoot() : Parent</text>
+  <text x="692" y="410" fill="#9fb0c3" font-size="10.5">+ setOnTargetSubmitted(DoubleConsumer) &#183; setOnSimulationToggled(Runnable)</text>
+  <text x="692" y="428" fill="#9fb0c3" font-size="11">- createHeader() &#183; createDisplay() &#183; createControls() : Node</text>
+  <text x="692" y="446" fill="#9fb0c3" font-size="11.5">- submitTarget()</text>
+  <text x="692" y="472" fill="#3ad4c4" font-size="11">names no device type &#8212; handed values, reports back through callbacks</text>
+
+  <line x1="612" y1="320" x2="668" y2="320" stroke="#8b98a5" stroke-width="2" marker-end="url(#solid)"/>
+  <text x="614" y="312" fill="#6e7d8d" font-size="10.5">builds</text>
+
+  <line x1="644" y1="506" x2="644" y2="540" stroke="#7d5bd6" stroke-width="3" marker-end="url(#violet)"/>
+  <text x="660" y="528" fill="#8b7dc0" font-size="11">the app holds an Incubator and a TemperatureSampler</text>
+
+  <!-- ================= package device ================= -->
+  <rect x="76" y="544" width="1136" height="520" rx="10" fill="#12181f" stroke="#3c1192" stroke-width="2"/>
+  <text x="96" y="570" fill="#b79bff" font-size="13" font-weight="bold" letter-spacing="1">package device &#8212; the incubator and its simulated sensor. Knows events, never ui.</text>
+
+  <rect x="100" y="584" width="512" height="250" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="120" y="610" fill="#e6edf3" font-size="14" font-weight="bold">TemperatureSampler</text>
+  <text x="120" y="628" fill="#7ee0d3" font-size="11">&#171;final &#183; implements AutoCloseable&#187;</text>
+  <line x1="100" y1="638" x2="612" y2="638" stroke="#2c3644"/>
+  <text x="120" y="658" fill="#9fb0c3" font-size="11.5">- incubator : Incubator &#183; source : TemperatureSource</text>
+  <text x="120" y="676" fill="#9fb0c3" font-size="11.5">- interval : Duration &#183; threadlock : Object</text>
+  <text x="120" y="694" fill="#9fb0c3" font-size="11.5">- scheduler : ScheduledExecutorService</text>
+  <line x1="100" y1="704" x2="612" y2="704" stroke="#2c3644"/>
+  <text x="120" y="724" fill="#9fb0c3" font-size="11.5">+ TemperatureSampler(incubator, source, interval)</text>
+  <text x="120" y="742" fill="#9fb0c3" font-size="11.5">+ start() &#183; stop() &#183; close() &#183; isRunning() : boolean</text>
+  <text x="120" y="770" fill="#6e7d8d" font-size="11">one daemon thread named "temperature-sampler"</text>
+  <text x="120" y="788" fill="#6e7d8d" font-size="11">start, stop and isRunning share the same lock</text>
+  <text x="120" y="806" fill="#6e7d8d" font-size="11">close() only delegates to stop() &#8212; it can be started again</text>
+
+  <rect x="672" y="584" width="520" height="250" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="692" y="610" fill="#e6edf3" font-size="14" font-weight="bold">Incubator</text>
+  <line x1="672" y1="620" x2="1192" y2="620" stroke="#2c3644"/>
+  <text x="692" y="640" fill="#9fb0c3" font-size="11.5">- targetCelsius, measuredCelsius, toleranceCelsius : double</text>
+  <text x="692" y="658" fill="#9fb0c3" font-size="11.5">- threadLock : Object &#183; MINIMUM_CHANGE_CELSIUS = 0.001</text>
+  <text x="692" y="676" fill="#9fb0c3" font-size="11.5">- eventSupport : EventSupport&#60;TemperatureChangedEvent&#62;</text>
+  <line x1="672" y1="686" x2="1192" y2="686" stroke="#2c3644"/>
+  <text x="692" y="706" fill="#9fb0c3" font-size="11.5">+ Incubator(targetCelsius, toleranceCelsius : double)</text>
+  <text x="692" y="724" fill="#9fb0c3" font-size="11.5">+ temperatureChanged() : Event&#60;TemperatureChangedEvent&#62;</text>
+  <text x="692" y="742" fill="#9fb0c3" font-size="11.5">+ updateTemperature(double) &#183; setTargetTemperature(double)</text>
+  <text x="692" y="760" fill="#9fb0c3" font-size="11.5">+ getCurrentTemperature() &#183; getTargetTemperature() : double</text>
+  <text x="692" y="778" fill="#9fb0c3" font-size="11.5">+ isWithinTolerance() : boolean</text>
+  <text x="692" y="796" fill="#9fb0c3" font-size="11">- requireValidTargetTemperature(double) &#183; requireValidTolerance(double)</text>
+  <text x="692" y="822" fill="#3ad4c4" font-size="11">hands out Event, never the EventSupport &#8212; only it may fire</text>
+
+  <line x1="612" y1="670" x2="668" y2="670" stroke="#8b98a5" stroke-width="2" marker-end="url(#solid)"/>
+  <text x="606" y="662" fill="#6e7d8d" font-size="10.5">reads &#183; updates</text>
+
+  <rect x="100" y="868" width="344" height="176" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="120" y="894" fill="#e6edf3" font-size="13.5" font-weight="bold">TemperatureSource</text>
+  <text x="120" y="912" fill="#7ee0d3" font-size="11">&#171;interface&#187;</text>
+  <line x1="100" y1="922" x2="444" y2="922" stroke="#2c3644"/>
+  <text x="120" y="942" fill="#9fb0c3" font-size="11">+ nextTemperature(</text>
+  <text x="134" y="960" fill="#9fb0c3" font-size="11">currentCelsius, targetCelsius : double)</text>
+  <text x="134" y="978" fill="#9fb0c3" font-size="11">: double</text>
+  <text x="120" y="1006" fill="#6e7d8d" font-size="11">computes the next value and remembers</text>
+  <text x="120" y="1024" fill="#6e7d8d" font-size="11">nothing &#8212; testable without a clock</text>
+
+  <line x1="272" y1="834" x2="272" y2="866" stroke="#8b98a5" stroke-width="2" marker-end="url(#solid)"/>
+  <text x="282" y="856" fill="#6e7d8d" font-size="10.5">asks on every tick</text>
+
+  <rect x="504" y="868" width="330" height="176" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="524" y="894" fill="#e6edf3" font-size="13.5" font-weight="bold">SimulatedTemperatureSource</text>
+  <text x="524" y="912" fill="#7ee0d3" font-size="11">&#171;final &#183; implements TemperatureSource&#187;</text>
+  <line x1="504" y1="922" x2="834" y2="922" stroke="#2c3644"/>
+  <text x="524" y="942" fill="#9fb0c3" font-size="11">- rng : Random</text>
+  <text x="524" y="960" fill="#9fb0c3" font-size="11">- PULL_FACTOR = 0.25 &#183; NOISE_CELSIUS = 0.2</text>
+  <line x1="504" y1="970" x2="834" y2="970" stroke="#2c3644"/>
+  <text x="524" y="990" fill="#9fb0c3" font-size="11">+ SimulatedTemperatureSource(rng : Random)</text>
+  <text x="524" y="1008" fill="#9fb0c3" font-size="11">+ nextTemperature(&#8230;) : double</text>
+  <text x="524" y="1032" fill="#6e7d8d" font-size="11">current + gap &#215; 0.25 + noise</text>
+
+  <line x1="502" y1="942" x2="448" y2="942" stroke="#7ee0d3" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#hollow)"/>
+
+  <rect x="894" y="868" width="298" height="176" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="914" y="894" fill="#e6edf3" font-size="13.5" font-weight="bold">TemperatureChangedEvent</text>
+  <text x="914" y="912" fill="#7ee0d3" font-size="11">&#171;record&#187;</text>
+  <line x1="894" y1="922" x2="1192" y2="922" stroke="#2c3644"/>
+  <text x="914" y="942" fill="#9fb0c3" font-size="11">+ previousCelsius : double</text>
+  <text x="914" y="960" fill="#9fb0c3" font-size="11">+ currentCelsius : double</text>
+  <text x="914" y="978" fill="#9fb0c3" font-size="11">+ accessors of the same name</text>
+  <text x="914" y="1006" fill="#6e7d8d" font-size="11">pure data &#8212; no logic, no validation;</text>
+  <text x="914" y="1024" fill="#6e7d8d" font-size="11">equals, hashCode, toString for free</text>
+
+  <line x1="1042" y1="834" x2="1042" y2="866" stroke="#8b98a5" stroke-width="2" marker-end="url(#solid)"/>
+  <text x="1052" y="856" fill="#6e7d8d" font-size="10.5">creates</text>
+
+  <line x1="644" y1="1064" x2="644" y2="1098" stroke="#7d5bd6" stroke-width="3" marker-end="url(#violet)"/>
+  <text x="660" y="1086" fill="#8b7dc0" font-size="11">the Incubator owns one EventSupport and hands out its Event view</text>
+
+  <!-- ================= package events ================= -->
+  <rect x="76" y="1102" width="1136" height="392" rx="10" fill="#12181f" stroke="#3c1192" stroke-width="2"/>
+  <text x="96" y="1128" fill="#b79bff" font-size="13" font-weight="bold" letter-spacing="1">package events &#8212; the observer toolkit. Knows nothing else in this project.</text>
+
+  <rect x="100" y="1142" width="300" height="150" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="120" y="1168" fill="#e6edf3" font-size="13.5" font-weight="bold">Event&#60;T&#62;</text>
+  <text x="120" y="1186" fill="#7ee0d3" font-size="11">&#171;interface&#187;</text>
+  <line x1="100" y1="1196" x2="400" y2="1196" stroke="#2c3644"/>
+  <text x="120" y="1216" fill="#9fb0c3" font-size="11">+ subscribe(</text>
+  <text x="134" y="1234" fill="#9fb0c3" font-size="11">listener : Consumer&#60;? super T&#62;)</text>
+  <text x="134" y="1252" fill="#9fb0c3" font-size="11">: Subscription</text>
+  <text x="120" y="1278" fill="#6e7d8d" font-size="11">the read-only half of the pair</text>
+
+  <rect x="430" y="1142" width="420" height="330" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="450" y="1168" fill="#e6edf3" font-size="13.5" font-weight="bold">EventSupport&#60;T&#62;</text>
+  <text x="450" y="1186" fill="#7ee0d3" font-size="11">&#171;implements Event&#60;T&#62;&#187;</text>
+  <line x1="430" y1="1196" x2="850" y2="1196" stroke="#2c3644"/>
+  <text x="450" y="1216" fill="#9fb0c3" font-size="11">- listeners : List&#60;Registration&#62; = CopyOnWriteArrayList</text>
+  <text x="450" y="1234" fill="#9fb0c3" font-size="11">- errorHandler : Consumer&#60;RuntimeException&#62;</text>
+  <line x1="430" y1="1244" x2="850" y2="1244" stroke="#2c3644"/>
+  <text x="450" y="1264" fill="#9fb0c3" font-size="11">+ EventSupport()  &#8594; errorHandler = printStackTrace</text>
+  <text x="450" y="1282" fill="#9fb0c3" font-size="10.5">+ EventSupport(errorHandler : Consumer&#60;RuntimeException&#62;)</text>
+  <text x="450" y="1300" fill="#9fb0c3" font-size="10.5">+ subscribe(listener : Consumer&#60;? super T&#62;) : Subscription</text>
+  <text x="450" y="1318" fill="#9fb0c3" font-size="11">+ fire(event : T)</text>
+  <line x1="430" y1="1330" x2="850" y2="1330" stroke="#2c3644" stroke-dasharray="4 3"/>
+  <text x="450" y="1350" fill="#e6edf3" font-size="11" font-weight="bold">- Registration &#171;inner class &#183; implements Subscription&#187;</text>
+  <text x="464" y="1368" fill="#9fb0c3" font-size="11">- consumer : Consumer&#60;? super T&#62;</text>
+  <text x="464" y="1386" fill="#9fb0c3" font-size="11">+ close() &#8594; listeners.remove(this)</text>
+  <text x="450" y="1412" fill="#3ad4c4" font-size="11">removed by identity, so close() is idempotent</text>
+  <text x="450" y="1430" fill="#3ad4c4" font-size="11">and can never remove someone else's subscription</text>
+  <text x="450" y="1454" fill="#6e7d8d" font-size="11">fire() catches per listener, so one does not stop the rest</text>
+
+  <line x1="428" y1="1178" x2="404" y2="1178" stroke="#7ee0d3" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#hollow)"/>
+
+  <rect x="880" y="1142" width="312" height="150" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="900" y="1168" fill="#e6edf3" font-size="13.5" font-weight="bold">Subscription</text>
+  <text x="900" y="1186" fill="#7ee0d3" font-size="11">&#171;@FunctionalInterface&#187;</text>
+  <text x="900" y="1204" fill="#7ee0d3" font-size="11">&#171;extends AutoCloseable&#187;</text>
+  <line x1="880" y1="1214" x2="1192" y2="1214" stroke="#2c3644"/>
+  <text x="900" y="1234" fill="#9fb0c3" font-size="11">+ close()</text>
+  <text x="900" y="1258" fill="#6e7d8d" font-size="11">redeclared without throws, so no</text>
+  <text x="900" y="1276" fill="#6e7d8d" font-size="11">caller is forced into a catch</text>
+
+  <path d="M852,1350 H866 V1234 H876" fill="none" stroke="#7ee0d3" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#hollow)"/>
+
+  <rect x="880" y="1312" width="312" height="160" rx="8" fill="#0e2a2a" stroke="#3ad4c4"/>
+  <text x="900" y="1340" fill="#7ee0d3" font-size="12.5" font-weight="bold">The rule that carries the design</text>
+  <text x="900" y="1366" fill="#a8ccc7" font-size="11">events and device hold no UI type.</text>
+  <text x="900" y="1384" fill="#a8ccc7" font-size="11">That is why their tests run without</text>
+  <text x="900" y="1402" fill="#a8ccc7" font-size="11">a window on screen, and why the</text>
+  <text x="900" y="1420" fill="#a8ccc7" font-size="11">interface stays replaceable without</text>
+  <text x="900" y="1438" fill="#a8ccc7" font-size="11">touching the device logic.</text>
+
+  <!-- ================= tests ================= -->
+  <rect x="76" y="1512" width="1136" height="164" rx="10" fill="#12181f" stroke="#2c3644" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="96" y="1538" fill="#8b98a5" font-size="13" font-weight="bold" letter-spacing="1">tests &#8212; JUnit 5 &#183; 22 in total, all green &#183; not one of them opens a window</text>
+
+  <rect x="100" y="1552" width="264" height="108" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="118" y="1576" fill="#e6edf3" font-size="12" font-weight="bold">IncubatorTest &#183; 8</text>
+  <text x="118" y="1598" fill="#9fb0c3" font-size="10.5">validation, tolerance boundary,</text>
+  <text x="118" y="1615" fill="#9fb0c3" font-size="10.5">event payload, 0.001 threshold,</text>
+  <text x="118" y="1632" fill="#9fb0c3" font-size="10.5">many threads, fire outside</text>
+  <text x="118" y="1649" fill="#9fb0c3" font-size="10.5">the lock</text>
+
+  <rect x="388" y="1552" width="264" height="108" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="406" y="1576" fill="#e6edf3" font-size="12" font-weight="bold">SimulatedSourceTest &#183; 3</text>
+  <text x="406" y="1598" fill="#9fb0c3" font-size="10.5">same seed gives the same</text>
+  <text x="406" y="1615" fill="#9fb0c3" font-size="10.5">sequence, values stay in a band</text>
+  <text x="406" y="1632" fill="#9fb0c3" font-size="10.5">around the target, and they</text>
+  <text x="406" y="1649" fill="#9fb0c3" font-size="10.5">move towards it</text>
+
+  <rect x="676" y="1552" width="264" height="108" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="694" y="1576" fill="#e6edf3" font-size="12" font-weight="bold">TemperatureSamplerTest &#183; 4</text>
+  <text x="694" y="1598" fill="#9fb0c3" font-size="10.5">updates arrive, none after</text>
+  <text x="694" y="1615" fill="#9fb0c3" font-size="10.5">close(), a stopped sampler</text>
+  <text x="694" y="1632" fill="#9fb0c3" font-size="10.5">starts again, and isRunning</text>
+  <text x="694" y="1649" fill="#9fb0c3" font-size="10.5">reports the truth</text>
+
+  <rect x="964" y="1552" width="228" height="108" rx="8" fill="#161d26" stroke="#2c3644"/>
+  <text x="982" y="1576" fill="#e6edf3" font-size="12" font-weight="bold">EventSupportTest &#183; 7</text>
+  <text x="982" y="1598" fill="#9fb0c3" font-size="10.5">delivery and order, cancel,</text>
+  <text x="982" y="1615" fill="#9fb0c3" font-size="10.5">null rejected, try-with-</text>
+  <text x="982" y="1632" fill="#9fb0c3" font-size="10.5">resources, a throwing</text>
+  <text x="982" y="1649" fill="#9fb0c3" font-size="10.5">listener is reported</text>
+</svg>

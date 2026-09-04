@@ -42,6 +42,18 @@ Fenster, und deshalb wäre die Oberfläche austauschbar, ohne die Gerätelogik a
 
 ---
 
+## Diagramme
+
+Ein Klick öffnet das jeweilige Diagramm in voller Größe. Beschriftet sind sie auf Englisch,
+wie der Code.
+
+| [**The path of a reading**](docs/flow-reading-path.svg) | [**Types and their dependencies**](docs/class-diagram.svg) |
+|:--|:--|
+| [<img src="docs/flow-reading-path.svg" width="420" alt="Ablauf: der Weg eines Messwerts vom Sampler-Thread zur Oberfläche">](docs/flow-reading-path.svg) | [<img src="docs/class-diagram.svg" width="420" alt="Klassendiagramm der drei Pakete">](docs/class-diagram.svg) |
+| Was bei jedem Takt passiert — wo der Wert unter einer Sperre liegt, wo ein Aufruf abbricht und wo die Thread-Grenze verläuft. | Alle Typen der drei Pakete mit Feldern und Methoden, und wer wen kennt. |
+
+---
+
 ## Die fünf Etappen
 
 | # | Etappe | Ergebnis | Stand |
