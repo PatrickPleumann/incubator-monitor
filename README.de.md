@@ -8,6 +8,8 @@ Ein simuliertes Laborgerät in Java: ein CO₂-Inkubator, der Zellkulturen auf e
 hält, seine Messwerte aus einem eigenen Thread meldet und von einer JavaFX-Oberfläche überwacht
 wird.
 
+<img src="docs/screenshot-window.png" width="620" alt="Das Anwendungsfenster: große Messwertanzeige, grüne Statusanzeige mit „Within tolerance", Sollwert-Eingabe mit Apply und ein Stop-Knopf">
+
 ---
 
 ## Worum es geht
@@ -23,6 +25,24 @@ kleines Projekt, das durchdacht ist, ist hier mehr wert als ein großes, das nur
 Vier Themen kommen dabei in ihrer natürlichen Reihenfolge zusammen: das Observer-Muster (Java hat
 kein `event`-Schlüsselwort — wer Ereignisse will, baut sie), Nebenläufigkeit, die Anbindung an
 eine UI mit eigenem Thread, und Testbarkeit.
+
+---
+
+## Starten
+
+Voraussetzung ist ein **JDK 21** — die Gradle-Toolchain ist auf Java 21 LTS festgelegt. JavaFX holt
+Gradle selbst; von Hand ist nichts zu installieren.
+
+```
+gradlew test    # alle Tests
+gradlew run     # Anwendung starten
+```
+
+Unter Windows heißt der Wrapper `gradlew.bat`, unter Linux und macOS `./gradlew`.
+
+`gradlew run` öffnet das oben abgebildete Fenster. Nach einem Druck auf **Start** aktualisiert sich
+der Messwert zweimal pro Sekunde; die Statusanzeige wechselt auf Bernstein, sobald der Wert das
+Toleranzband um den Sollwert verlässt, und zurück auf Grün, sobald er es wieder erreicht.
 
 ---
 
@@ -82,11 +102,8 @@ Zeitgeber, der sich sauber beenden lässt.
 Start/Stopp. Jeder Zugriff aus dem Sensor-Thread läuft über `Platform.runLater(…)` — die Brücke
 zwischen den Threads ist der eigentliche Inhalt dieser Etappe.
 
-Die schriftliche Abnahmeliste wurde am 04.09.2026 von Hand durchgegangen und in allen neun Punkten
-bestanden, das Speicherverhalten eingeschlossen: Über zehn Minuten stieg der Heap durchgehend an,
-ohne ein einziges Mal aufzuräumen; ein erzwungenes Aufräumen ließ ihn danach unter seinen eigenen
-Ausgangswert fallen. Eine steigende Kurve sagt bei großzügigem Heap nichts — vergleichbar sind nur
-erzwungene Tiefpunkte.
+Die schriftliche Abnahmeliste wurde von Hand durchgegangen und in allen neun Punkten bestanden —
+siehe [Abnahme](#abnahme) weiter unten.
 
 **Etappe 5 — Abrunden.** README, ein frischer Klon, der ohne Nacharbeit baut und startet, und eine
 ehrliche Liste dessen, was bewusst offen blieb.
@@ -97,49 +114,34 @@ Jede Etappe endet in einem vorzeigbaren Zustand. Was da ist, läuft; die Tests s
 
 ## Abnahme
 
-Es gibt hier **keine automatisierten UI-Tests**. Sie bräuchten eigenes Werkzeug und einen
-laufenden Fenster-Server — unverhältnismäßig für ein Fenster dieser Größe. An ihrer Stelle steht
-eine schriftliche Abnahmeliste aus neun Punkten, von Hand durchgegangen und im Entwicklungsplan
-festgehalten.
-
-Der letzte dieser neun — *zehn Minuten laufen lassen, keine wachsende Speicherlast* — war der
-einzige, der es wert war, aufgehoben zu werden.
+Es gibt hier **keine automatisierten UI-Tests** — sie bräuchten eigenes Werkzeug und einen
+laufenden Fenster-Server, unverhältnismäßig für ein Fenster dieser Größe. An ihrer Stelle steht
+eine schriftliche Abnahmeliste aus neun Punkten, am 04.09.2026 von Hand durchgegangen und
+vollständig bestanden. Der letzte davon war der einzige, der es wert war, aufgehoben zu werden:
+*zehn Minuten laufen lassen, keine wachsende Speicherlast*.
 
 [<img src="docs/acceptance-heap.png" alt="Heap-Nutzung über zwanzig Minuten, mit Pfeilen an zwei erzwungenen und einer automatischen Aufräumaktion">](docs/acceptance-heap.png)
 
-*Heap-Nutzung über gut zwanzig Minuten. **Grün: von Hand erzwungenes Aufräumen. Rot: eines, das
-die JVM von selbst ausgelöst hat.***
+*Zwanzig Minuten. **Grün: von Hand erzwungenes Aufräumen. Rot: eines, das die JVM von selbst
+ausgelöst hat.***
 
 Die ersten zehn Minuten steigt die Kurve nur — von 17 auf 59 MB, kein Sägezahn weit und breit. Das
 sieht nach einem Leck aus und ist keins: Der Heap darf hier bis 8 GB wachsen, also hatte der
-Aufräumer keinen Anlass, tätig zu werden, und laut Zählern war er es auch kaum.
-
-Das zweite erzwungene Aufräumen lässt den Heap auf 9 MB fallen und den festgeschriebenen Speicher
-von 110 auf 41 MB schrumpfen. Erst dieser kleinere Heap macht das dritte Tal möglich: Der
-Jungbereich füllt sich jetzt in Minuten statt in einer Viertelstunde, und um 17:11 räumt die JVM
-**von selbst** auf, bis auf 10,5 MB. Die Pfeile markieren dabei zwei verschiedene Mechanismen — die
-erzwungenen sind vollständige Sammlungen, die automatische ist eine Sammlung im Jungbereich, also
-ein gewöhnlicher Zacken des Sägezahns, auf den wir gewartet hatten.
-
-Zwei Tiefpunkte, unabhängig voneinander zustande gekommen, Minuten auseinander, auf gleicher Höhe.
-Es bleibt nichts liegen.
-
-Lässt man das Ganze noch eine Viertelstunde weiterlaufen, wird das Bild eindeutig:
+Aufräumer keinen Anlass und wurde kaum tätig. Das erzwungene Aufräumen lässt ihn dann auf 9 MB
+fallen und den festgeschriebenen Speicher von 110 auf 41 MB schrumpfen — und erst dieser kleinere
+Heap macht das dritte Tal möglich, in dem die JVM von selbst aufräumt.
 
 [<img src="docs/acceptance-heap-30min.png" alt="Heap-Nutzung über dreißig Minuten: nach dem erzwungenen Aufräumen pendelt sich die Kurve auf einen wiederkehrenden Sägezahn zwischen 10 und 22 MB ein">](docs/acceptance-heap-30min.png)
 
-*Derselbe Durchlauf nach einer halben Stunde. Keine Pfeile nötig — alles ab 17:06 macht die JVM
-von allein.*
+*Derselbe Durchlauf nach einer halben Stunde. Alles ab 17:06 macht die JVM von allein.*
 
-Von da an räumt sie vollständig selbstständig auf, ungefähr alle fünf Minuten: hoch auf rund
-22 MB, runter auf rund 10 MB, und wieder, und wieder. Drei Zyklen, drei Tiefpunkte, alle auf
-derselben Höhe — das ist der Sägezahn, der in den ersten zehn Minuten gefehlt hat, und seine Form
-ist die ganze Antwort. **Ein Leck würde den Boden mit jedem Zyklus ein Stück anheben.** Dieser
-rührt sich nicht.
+Sich selbst überlassen, pendelt sie sich ein: hoch auf rund 22 MB, runter auf rund 10 MB, etwa alle
+fünf Minuten. Drei Zyklen, drei Tiefpunkte, alle auf derselben Höhe. **Ein Leck würde den Boden mit
+jedem Zyklus ein Stück anheben** — dieser rührt sich nicht.
 
-Gelernt wurde dabei weniger über den Code als über das Messwerkzeug: **Bei großzügigem Heap sagt
-eine steigende Kurve nichts.** Vergleichbar sind nur Tiefpunkte — und einer, den die Laufzeit
-selbst gewählt hat, ist mehr wert als einer, den man herausgequetscht hat.
+Gelernt wurde dabei weniger über den Code als über das Messwerkzeug: Bei großzügigem Heap sagt eine
+steigende Kurve nichts, vergleichbar sind nur Tiefpunkte. Die vollständige Messung samt der Zähler
+des Aufräumers steht im Review-Protokoll von [`ENTWICKLUNGSPLAN.md`](ENTWICKLUNGSPLAN.md).
 
 ---
 
@@ -174,22 +176,48 @@ einführt, sondern dadurch, dass man sie an zehn Stellen wieder herausoperieren 
 
 Java 21 LTS · Gradle (Kotlin-DSL) · JavaFX 21 · JUnit
 
-**Keine Fremdbibliotheken** außer diesen. Alles andere würde den Eigenanteil verwischen.
-
-Ebenfalls bewusst außen vor: Netzwerk, Datenbank, Persistenz, Multi-Modul-Aufbau.
-
 ---
 
-## Starten
+## Bewusste Entscheidungen und offene Punkte
 
-```
-gradlew test    # alle Tests
-gradlew run     # Anwendung starten
-```
+**Java 21 LTS, nicht die neueste Fassung.** 21 ist die Version, die in Firmen tatsächlich läuft.
+Das kostet die kurze `void main()` neuerer Ausgaben — dafür wird die klassische
+`public static void main(String[] args)` geübt.
 
-`gradlew run` öffnet das Fenster. Nach einem Druck auf **Start** aktualisiert sich der Messwert
-zweimal pro Sekunde; die Statusanzeige wechselt auf Bernstein, sobald der Wert das Toleranzband um
-den Sollwert verlässt, und zurück auf Grün, sobald er es wieder erreicht.
+**`CopyOnWriteArrayList` für die Listener.** Ein Listener darf sein eigenes Abo beenden, während
+`fire()` noch durch die Liste läuft. Copy-on-write iteriert über eine Momentaufnahme, das Entfernen
+kann die Schleife also nicht stören. Der Preis ist eine Kopie bei jeder Änderung — bei einer
+Handvoll Listenern belanglos, bei Tausenden die falsche Wahl.
+
+**Die Oberfläche entsteht in Java-Code, nicht in FXML.** Ein Werkzeug weniger, das schiefgehen
+kann. FXML bringt bei diesem Umfang keinen Vorteil.
+
+**Keine Fremdbibliotheken.** Nur JDK, JavaFX und JUnit. Alles andere würde den Eigenanteil
+verwischen.
+
+**Keine automatisierten UI-Tests** — was stattdessen da ist, steht unter [Abnahme](#abnahme).
+
+**Bewusst außen vor:** Netzwerk, Datenbank, Persistenz, Multi-Modul-Aufbau. Nichts davon würde
+etwas zeigen, was die vier Kernthemen nicht schon zeigen.
+
+### Was bei mehr Zeit anders wäre
+
+- **Reentranz beim Feuern.** Löst ein Listener während `fire()` selbst eine Änderung aus,
+  verschachteln sich die Ereignisse. Eine Warteschlange würde es lösen; bis dahin ist es
+  dokumentiertes Verhalten statt ungewollter Zufall.
+- **Reihenfolge bei gleichzeitigen Änderungen.** Weil `fire()` außerhalb der Sperre läuft, können
+  Ereignisse in anderer Reihenfolge ankommen, als die Änderungen geschahen. Die Alternative — fremder
+  Listener-Code unter der eigenen Sperre — ist der schlechtere Tausch.
+- **Kein Rückstau-Schutz.** Ein langsamer Listener bremst den Sensor-Thread. Bei echter Hardware
+  bräuchte es eine Warteschlange dazwischen.
+- **Zwei Antworten auf Listener-Fehler im selben Paket.** `EventSupport` nimmt einen Fehler-Handler
+  entgegen, `TemperatureSampler` schreibt den Stacktrace selbst. Einheitlichkeit kostete einen
+  Konstruktorparameter, den bisher kein Aufrufer braucht.
+- **Ein Listener, der den Sampler schließt, blockiert eine Sekunde.** Er wartet auf ein Schloss, das
+  der Thread hält, der seinerseits auf die Rückkehr dieses Listeners wartet. Es löst sich nach dem
+  Zeitlimit von selbst, ist aber eine echte Sekunde Stillstand.
+- **Fehlerbehandlung in der Oberfläche ist minimal.** Der Kern ist abgesichert, die Oberfläche
+  nicht — eine bewusste Gewichtung, kein Versehen.
 
 ---
 

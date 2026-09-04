@@ -8,6 +8,8 @@ A simulated laboratory device written in Java: a CO₂ incubator that keeps cell
 target temperature, reports its readings from a thread of its own, and is monitored by a JavaFX
 user interface.
 
+<img src="docs/screenshot-window.png" width="620" alt="The application window: a large temperature reading, a green status light reading Within tolerance, a target input with Apply, and a Stop button">
+
 ---
 
 ## What this is about
@@ -23,6 +25,24 @@ that is thought through is worth more here than a large one that merely runs.
 Four topics come together in their natural order: the observer pattern (Java has no `event`
 keyword — if you want events, you build them), concurrency, binding to a UI that owns its own
 thread, and testability.
+
+---
+
+## Running it
+
+Requires a **JDK 21** — the Gradle toolchain is pinned to Java 21 LTS. JavaFX is fetched by Gradle;
+nothing has to be installed by hand.
+
+```
+gradlew test    # all tests
+gradlew run     # start the application
+```
+
+On Windows the wrapper is `gradlew.bat`, on Linux and macOS `./gradlew`.
+
+`gradlew run` opens the window shown above. Press **Start** and the reading updates twice a second;
+the status light turns amber once the value leaves the tolerance band around the target, and green
+again when it returns.
 
 ---
 
@@ -81,10 +101,8 @@ that can be shut down cleanly.
 and a start/stop control. Every access from the sensor thread goes through `Platform.runLater(…)`
 — that bridge between threads is what this stage is really about.
 
-The written acceptance list was walked through by hand on 2026-09-04 and passed on all nine points,
-memory behaviour included: over ten minutes the heap climbed steadily without ever collecting, and
-a forced collection then dropped it below its own starting floor. A rising curve on a generously
-sized heap says nothing — only forced low points can be compared.
+The written acceptance list was walked through by hand and passed on all nine points — see
+[Acceptance](#acceptance) below.
 
 **Stage 5 — Wrap-up.** README, a fresh clone that builds and runs with no extra steps, and an
 honest list of what was deliberately left open.
@@ -95,45 +113,32 @@ Every stage ends in a presentable state. Whatever exists, runs; the tests are gr
 
 ## Acceptance
 
-There are **no automated UI tests** here. They would need their own tooling and a running window
-server, which is out of proportion to a window this size. In their place stands a written
-acceptance list of nine points, walked through by hand and recorded in the development plan.
-
-The last of those nine — *ten minutes of running, no growing memory* — turned out to be the one
-worth keeping.
+There are **no automated UI tests** here — they would need their own tooling and a running window
+server, out of proportion to a window this size. In their place stands a written acceptance list of
+nine points, walked through by hand on 2026-09-04 and passed in full. The last of them turned out
+to be the one worth keeping: *ten minutes of running, no growing memory*.
 
 [<img src="docs/acceptance-heap.png" alt="Heap usage over twenty minutes, with two forced collections and one automatic collection marked by arrows">](docs/acceptance-heap.png)
 
-*Heap usage over roughly twenty minutes. **Green: a collection forced by hand. Red: one the JVM
-ran on its own.***
+*Twenty minutes. **Green: a collection forced by hand. Red: one the JVM ran on its own.***
 
 For the first ten minutes the curve only climbs — 17 MB to 59 MB, not a sawtooth in sight. That
-looks like a leak and is not one. The heap here may grow to 8 GB, so the collector had no reason
-to act, and the counters confirm it barely did.
-
-The second forced collection drops the heap to 9 MB and shrinks the committed memory from 110 MB
-to 41 MB. That smaller heap is what makes the third valley possible: the young region now fills in
-minutes instead of a quarter of an hour, and at 17:11 the JVM collects **on its own**, down to
-10.5 MB. The two arrows also mark two different mechanisms — the forced ones are full collections,
-the automatic one is a young-generation collection, an ordinary tooth of the sawtooth we had been
-waiting for.
-
-Two floors, arrived at independently, minutes apart, at the same height. Nothing accumulates.
-
-Left running for another quarter of an hour, the picture becomes plain:
+looks like a leak and is not one: this heap may grow to 8 GB, so the collector had no reason to act
+and barely did. The forced collection then drops it to 9 MB and shrinks the committed memory from
+110 MB to 41 MB — and only that smaller heap makes the third valley possible, where the JVM
+collects on its own.
 
 [<img src="docs/acceptance-heap-30min.png" alt="Heap usage over thirty minutes: after the forced collection the curve settles into a repeating sawtooth between 10 and 22 MB">](docs/acceptance-heap-30min.png)
 
-*The same run, half an hour in. No arrows needed — everything after 17:06 is the JVM's own doing.*
+*The same run, half an hour in. Everything after 17:06 is the JVM's own doing.*
 
-From there on it collects entirely by itself, roughly every five minutes: up to about 22 MB, down
-to about 10 MB, and again, and again. Three cycles, three floors, all at the same height — this is
-the sawtooth that was missing from the first ten minutes, and its shape is the whole answer. **A
-leak would lift the floor a little with every cycle.** This one does not move.
+Left alone it settles into a rhythm: up to about 22 MB, down to about 10 MB, roughly every five
+minutes. Three cycles, three floors, all at the same height. **A leak would lift the floor a little
+with every cycle** — this one does not move.
 
-What this really taught was how to read the instrument rather than the code: **on a generously
-sized heap, a rising curve says nothing.** Only low points can be compared — and one the runtime
-chose by itself is worth more than one squeezed out by hand.
+The lesson was about reading the instrument rather than the code: on a generously sized heap a
+rising curve says nothing, and only low points can be compared. The full measurement, with the
+collector's own counters, is in the review log of [`ENTWICKLUNGSPLAN.md`](ENTWICKLUNGSPLAN.md).
 
 ---
 
@@ -168,22 +173,47 @@ when they have to be cut back out of ten places.
 
 Java 21 LTS · Gradle (Kotlin DSL) · JavaFX 21 · JUnit
 
-**No third-party libraries** beyond these. Anything else would blur how much of this is my own work.
-
-Also deliberately out of scope: networking, databases, persistence, a multi-module layout.
-
 ---
 
-## Running it
+## Deliberate decisions and open points
 
-```
-gradlew test    # all tests
-gradlew run     # start the application
-```
+**Java 21 LTS, not the newest release.** 21 is the version companies actually run. It costs the
+short `void main()` of newer releases — in exchange, the classic
+`public static void main(String[] args)` gets practised.
 
-`gradlew run` opens the window. Press **Start** and the reading updates twice a second; the status
-light turns amber once the value leaves the tolerance band around the target, and green again when
-it returns.
+**`CopyOnWriteArrayList` for the listeners.** A listener may cancel its own subscription while
+`fire()` is still walking the list. Copy-on-write iterates over a snapshot, so the removal cannot
+disturb the loop. It copies the list on every change — meaningless for a handful of listeners, and
+the wrong choice for thousands.
+
+**The interface is built in Java code, not FXML.** One tool fewer that can go wrong. FXML buys
+nothing at this size.
+
+**No third-party libraries.** Only the JDK, JavaFX and JUnit. Anything else would blur how much of
+this is my own work.
+
+**No automated UI tests** — see [Acceptance](#acceptance) for what stands in their place.
+
+**Out of scope on purpose:** networking, databases, persistence, a multi-module layout. None of
+them would show anything the four core topics do not already show.
+
+### What would be different with more time
+
+- **Reentrancy while firing.** If a listener triggers another change during `fire()`, the events
+  nest. A queue would resolve it; for now it is documented behaviour rather than an accident.
+- **Ordering under concurrent changes.** Because `fire()` runs outside the lock, events can arrive
+  in a different order than the changes happened. The alternative — foreign listener code running
+  under this object's own lock — is the worse trade.
+- **No backpressure.** A slow listener slows the sampler thread down. Real hardware would need a
+  queue between the two.
+- **Two answers to listener failures in one package.** `EventSupport` takes an error handler,
+  `TemperatureSampler` prints the stack trace itself. Consistency would cost a constructor
+  parameter that no caller needs yet.
+- **A listener that closes the sampler blocks for a second.** It waits for a lock held by the
+  thread that is itself waiting for that listener to return. It resolves on its own after the
+  timeout, but it is a real second of standstill.
+- **Error handling in the interface is minimal.** The core is guarded, the UI is not — a deliberate
+  weighting rather than an oversight.
 
 ---
 

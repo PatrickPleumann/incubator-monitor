@@ -88,7 +88,7 @@ Review da, und dafür ist Etappe 5 da.
 
 ## Aufgabenliste
 
-Stand: **Etappe 4 vollständig abgeschlossen** (04.09.2026). Die Liste zeigt den Stand
+Stand: **Aufgabe 5.1 abgeschlossen** (04.09.2026), offen ist nur noch 5.2. Die Liste zeigt den Stand
 der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 
 **Etappe 1 — Gerüst**
@@ -116,7 +116,7 @@ der letzten Standortbestimmung, nicht zwingend den Stand von jetzt.
 - [x] 4.3 Abnahmeliste von Hand durchgegangen — alle neun Punkte bestanden (siehe Review-Protokoll)
 
 **Etappe 5 — Abrunden**
-- [ ] 5.1 README überarbeiten (Grundfassung steht seit 01.09.2026)
+- [x] 5.1 README überarbeiten — vier geforderte Abschnitte vollständig, Screenshot ergänzt
 - [ ] 5.2 Frischer Klon baut, testet und startet
 
 ---
@@ -677,4 +677,6 @@ umgehen ist der einzige Fehler, den man dabei machen kann.
 | 03.09.2026 | `MonitorView` kennt den `Incubator` nicht; Eingaben laufen über Rückrufe | Für den Sollwert und den Start/Stopp-Knopf muss die Wirkung von der Oberfläche zum Gerät. Statt der View den `Incubator` in den Konstruktor zu geben, bietet sie `setOnTargetSubmitted(DoubleConsumer)` und `setOnSimulationToggled(Runnable)` an; verdrahtet wird in der App. Die View bekommt damit weiterhin nur Zahlen und Wahrheitswerte und bleibt austauschbar. Die Bereichsprüfung 0–100 bleibt im Gerät — die Oberfläche fängt die `IllegalArgumentException` und färbt das Feld rot (U-5), statt die Regel zu wiederholen. |
 | 03.09.2026 | Temperaturanzeige mit `Locale.ROOT` formatiert | `String.format("%.2f")` nimmt sonst die Systemsprache und zeigt `37,00` mit Komma, während `Double.parseDouble` im Eingabefeld nur den Punkt akzeptiert. Der Benutzer hätte nicht eintippen können, was direkt darüber steht. Da die Oberfläche durchgehend englisch beschriftet ist, ist die neutrale Darstellung mit Punkt die passende Seite des Widerspruchs. |
 | 04.09.2026 | Zwei Diagramme unter `docs/` angelegt und in beiden READMEs verlinkt | Der Plan sieht keine Diagramme vor. Beide beantworten aber Fragen, die der Fließtext nur umständlich beantwortet: `flow-reading-path.svg` zeigt den Weg eines Messwerts samt Sperrbereich, Abbruchstellen und Thread-Grenze, `class-diagram.svg` alle Typen der drei Pakete und wer wen kennt. Handgeschriebenes SVG statt eines Werkzeugs — kein Build-Schritt, keine Fremdbibliothek, und GitHub stellt die Dateien ohne Zutun dar. Aufgabe 5.1 prüft am Ende, ob beide noch zum Code passen. |
+| 04.09.2026 | Beide Diagramme nach Abschluss von 4.2 korrigiert | Die Gegenprüfung aus 5.1 fiel negativ aus: Im Klassendiagramm stand „no subscription yet — that is stage 4.2", im Ablaufdiagramm „Platform.runLater( … ) — stage 4.2, not built yet". Beides war seit dem Einbau der Thread-Brücke falsch, und beide Dateien sind prominent im README verlinkt. Nur Texte ersetzt, Geometrie unverändert. |
+| 04.09.2026 | README um Abschnitte „Abnahme" und „Bewusste Entscheidungen und offene Punkte" erweitert, „Starten" nach oben gezogen | Die Gegenprüfung gegen die Spezifikation von 5.1 ergab drei Lücken: Die benötigte Java-Version fehlte im Start-Abschnitt, `CopyOnWriteArrayList` und die Begründung für Java 21 LTS kamen im README überhaupt nicht vor, und eine Liste offener Punkte gab es nur in den beiden deutschen Arbeitsdokumenten — also nicht dort, wo ein Besucher zuerst hinsieht. Dazu fehlte der Screenshot des Fensters, während zwei Bilder eines Speicher-Analysewerkzeugs bereits drin waren. Der Abnahme-Abschnitt wurde beim selben Durchgang etwa halbiert: Er war der längste des Dokuments geworden, obwohl Garbage-Collection-Verhalten nicht zu den vier Kernthemen gehört; die Herleitung steht vollständig im Review-Protokoll. |
 | 04.09.2026 | Aufräumen in `Application.stop()` statt in `stage.setOnCloseRequest(...)` (Aufgabe 4.2, Tipp 3) | Der Plan nannte `setOnCloseRequest`. Das feuert nur, wenn der Benutzer genau dieses Fenster schließt — nicht bei `Platform.exit()` —, und ein anderer Handler kann das Ereignis abfangen, dann läuft das Aufräumen nie. `stop()` ruft die JavaFX-Laufzeit beim Herunterfahren in jedem Fall auf und ist das Gegenstück zu `start()`: aufgeräumt wird dort, wo auch aufgebaut wurde. Reihenfolge im Rumpf: erst `subscription.close()`, dann `sampler.close()` — andersherum könnte der Sampler in der Sekunde, die sein `close()` auf das Herunterfahren wartet, noch Ereignisse an eine Oberfläche schicken, die gerade verschwindet. |
