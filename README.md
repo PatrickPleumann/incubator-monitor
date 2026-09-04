@@ -128,8 +128,9 @@ to be the one worth keeping: *ten minutes of running, no growing memory*.
 For the first ten minutes the curve only climbs — 17 MB to 59 MB, not a sawtooth in sight. That
 looks like a leak and is not one: this heap may grow to 8 GB, so the collector had no reason to act
 and barely did. The forced collection then drops it to 9 MB and shrinks the committed memory from
-110 MB to 41 MB — and only that smaller heap makes the third valley possible, where the JVM
-collects on its own.
+110 MB to 41 MB. Only after that does the JVM collect on its own, in the third valley — the likely
+reason being that the young region of a smaller heap fills sooner. That last part is an inference
+from the numbers, not something measured here.
 
 [<img src="docs/acceptance-heap-30min.png" alt="Heap usage over thirty minutes: after the forced collection the curve settles into a repeating sawtooth between 10 and 22 MB">](docs/acceptance-heap-30min.png)
 
@@ -214,13 +215,16 @@ would live just as long either way — but about who may know whom: delete the w
 window on screen.
 
 **Cleanup in `Application.stop()`, not in `stage.setOnCloseRequest(…)`.** The runtime calls `stop()`
-on every shutdown path; a close request fires only when the user closes that one window, and
-another handler can swallow it.
+whenever the application ends regularly — closing the last window as well as `Platform.exit()`; a
+hard `System.exit()` bypasses it, but then nothing is cleaned up anyway. A close request, by
+contrast, fires only when the user closes that one window, and another handler can swallow it.
 
 **`CopyOnWriteArrayList` for the listeners.** A listener may cancel its own subscription while
 `fire()` is still walking the list. Copy-on-write iterates over a snapshot, so the removal cannot
-disturb the loop. It copies the list on every change — meaningless for a handful of listeners, and
-the wrong choice for thousands.
+disturb the loop. Copying happens only when the list **changes** — on subscribe and unsubscribe,
+never on firing: here that is two copies over the whole run of the program, while the device
+reports twice a second without touching the list. It becomes the wrong choice where listeners come
+and go constantly; the length of the list then merely multiplies the cost of each single copy.
 
 **A model rather than a sensor behind the seam** — the longest of these decisions has
 [its own section](#one-design-decision-a-model-not-a-sensor) above.

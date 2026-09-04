@@ -131,8 +131,9 @@ ausgelöst hat.***
 Die ersten zehn Minuten steigt die Kurve nur — von 17 auf 59 MB, kein Sägezahn weit und breit. Das
 sieht nach einem Leck aus und ist keins: Der Heap darf hier bis 8 GB wachsen, also hatte der
 Aufräumer keinen Anlass und wurde kaum tätig. Das erzwungene Aufräumen lässt ihn dann auf 9 MB
-fallen und den festgeschriebenen Speicher von 110 auf 41 MB schrumpfen — und erst dieser kleinere
-Heap macht das dritte Tal möglich, in dem die JVM von selbst aufräumt.
+fallen und den festgeschriebenen Speicher von 110 auf 41 MB schrumpfen. Erst danach räumt die JVM
+im dritten Tal von selbst auf — vermutlich, weil sich der Jungbereich eines kleineren Heaps eher
+füllt. Dieser letzte Teil ist eine Deutung der Zahlen, nicht hier gemessen.
 
 [<img src="docs/acceptance-heap-30min.png" alt="Heap-Nutzung über dreißig Minuten: nach dem erzwungenen Aufräumen pendelt sich die Kurve auf einen wiederkehrenden Sägezahn zwischen 10 und 22 MB ein">](docs/acceptance-heap-30min.png)
 
@@ -216,13 +217,18 @@ Paket `ui`, kompilieren `device` und `events` weiter und ihre Tests laufen weite
 brauchen die Tests auch kein Fenster auf dem Bildschirm.
 
 **Aufgeräumt wird in `Application.stop()`, nicht in `stage.setOnCloseRequest(…)`.** Die Laufzeit
-ruft `stop()` auf jedem Weg des Herunterfahrens auf; ein Schließen-Ereignis feuert nur beim
-Zuklicken dieses einen Fensters und kann von einem anderen Handler abgefangen werden.
+ruft `stop()` bei jedem **regulären** Ende auf — beim Schließen des letzten Fensters ebenso wie bei
+`Platform.exit()`; ein hartes `System.exit()` umgeht es, dann wird aber ohnehin nichts mehr
+aufgeräumt. Ein Schließen-Ereignis feuert dagegen nur beim Zuklicken dieses einen Fensters und kann
+von einem anderen Handler abgefangen werden.
 
 **`CopyOnWriteArrayList` für die Listener.** Ein Listener darf sein eigenes Abo beenden, während
 `fire()` noch durch die Liste läuft. Copy-on-write iteriert über eine Momentaufnahme, das Entfernen
-kann die Schleife also nicht stören. Der Preis ist eine Kopie bei jeder Änderung — bei einer
-Handvoll Listenern belanglos, bei Tausenden die falsche Wahl.
+kann die Schleife also nicht stören. Kopiert wird nur beim **Ändern** der Liste — also beim An- und
+Abmelden, nicht beim Feuern: Hier sind das zwei Kopien im ganzen Programmlauf, während das Gerät
+zweimal pro Sekunde meldet, ohne die Liste anzufassen. Die falsche Wahl wäre sie erst dort, wo sich
+Listener ständig an- und abmelden; die Länge der Liste multipliziert dann nur noch den Preis der
+einzelnen Kopie.
 
 **Rechenmodell statt Sensor hinter der Naht** — die längste dieser Entscheidungen hat
 [einen eigenen Abschnitt](#eine-entwurfsentscheidung-rechenmodell-statt-sensor) weiter oben.
