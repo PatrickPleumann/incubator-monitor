@@ -4,7 +4,7 @@
 
 > **Stand: abgeschlossen — alle fünf Etappen fertig** — 04.09.2026
 
-Ein simuliertes Laborgerät in Java: ein CO₂-Inkubator, der Zellkulturen auf einer Zieltemperatur
+Ein simuliertes Laborgerät in Java: ein Inkubator, der Zellkulturen auf einer Zieltemperatur
 hält, seine Messwerte aus einem eigenen Thread meldet und von einer JavaFX-Oberfläche überwacht
 wird.
 

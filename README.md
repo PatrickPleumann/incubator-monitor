@@ -4,7 +4,7 @@
 
 > **Status: complete — all five stages done** — 2026-09-04
 
-A simulated laboratory device written in Java: a CO₂ incubator that keeps cell cultures at a
+A simulated laboratory device written in Java: an incubator that keeps cell cultures at a
 target temperature, reports its readings from a thread of its own, and is monitored by a JavaFX
 user interface.
 

@@ -15,7 +15,7 @@ public final class SimulatedTemperatureSource implements TemperatureSource
     public double nextTemperature(double currentCelsius, double targetCelsius)
     {
         double gap = targetCelsius - currentCelsius;
-        double noise = (rng.nextDouble() * 2.0 - 1.0) * NOISE_CELSIUS;
+        double noise = ((rng.nextDouble() * 2.0) - 1.0) * NOISE_CELSIUS;
         return currentCelsius + gap * PULL_FACTOR + noise;
     }
 }
