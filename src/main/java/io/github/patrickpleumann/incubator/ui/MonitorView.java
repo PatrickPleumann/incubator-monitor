@@ -101,7 +101,6 @@ public class MonitorView
             statusDot.setFill(STATUS_WARN);
             statusLabel.setText("Out of tolerance");
         }
-
     }
 
     public Parent getRoot()
