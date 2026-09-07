@@ -200,8 +200,11 @@ Bewusst nicht gelöst, mit Grund:
 - **Reentranz beim Feuern.** Ruft ein Listener während `fire()` selbst eine Zustandsänderung aus,
   verschachteln sich die Ereignisse. Eine Warteschlange würde das lösen; für den aktuellen Umfang
   ist es dokumentiertes Verhalten statt ungewollter Zufall.
-- **Kein Rückstau-Schutz.** Ein langsamer Listener bremst den Sensor-Thread. Bei einem echten Gerät
-  bräuchte es Entkopplung über eine Queue.
+- **Der Sensor-Takt hängt am langsamsten Listener.** `fire()` läuft synchron auf dem
+  Sampler-Thread; eine langsame Reaktion verlängert die Runde, und weil die Pause erst danach
+  beginnt, misst das Gerät seltener. Aufstauen kann sich dabei nichts — ein echter Rückstau
+  entstünde erst bei einem Gerät, das unabhängig weitermisst, und bräuchte dann Entkopplung über
+  eine Queue.
 - **Zwei Antworten auf Listener-Fehler im selben Paket.** Der `EventSupport` nimmt einen
   Fehler-Handler entgegen, der `TemperatureSampler` schreibt den Stacktrace stumpf nach
   `System.err`. Konsequent wäre auch hier ein hereingereichter Handler; das kostet einen

@@ -258,8 +258,10 @@ etwas zeigen, was die vier Kernthemen nicht schon zeigen.
 - **Reihenfolge bei gleichzeitigen Änderungen.** Weil `fire()` außerhalb der Sperre läuft, können
   Ereignisse in anderer Reihenfolge ankommen, als die Änderungen geschahen. Die Alternative — fremder
   Listener-Code unter der eigenen Sperre — ist der schlechtere Tausch.
-- **Kein Rückstau-Schutz.** Ein langsamer Listener bremst den Sensor-Thread. Bei echter Hardware
-  bräuchte es eine Warteschlange dazwischen.
+- **Der Sensor-Takt hängt am langsamsten Listener.** `fire()` läuft synchron auf dem
+  Sampler-Thread. Ein langsamer Listener verlängert die Runde, und die Pause beginnt erst danach —
+  die Messung wird also seltener, nicht nachgeholt. Ein Rückstau ist das nicht; der entstünde erst
+  bei echter Hardware, die unabhängig weitermisst, und bräuchte dann eine Warteschlange dazwischen.
 - **Zwei Antworten auf Listener-Fehler im selben Paket.** `EventSupport` nimmt einen Fehler-Handler
   entgegen, `TemperatureSampler` schreibt den Stacktrace selbst. Einheitlichkeit kostete einen
   Konstruktorparameter, den bisher kein Aufrufer braucht.

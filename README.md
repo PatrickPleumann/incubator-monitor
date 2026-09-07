@@ -253,7 +253,10 @@ them would show anything the four core topics do not already show.
 - **Ordering under concurrent changes.** Because `fire()` runs outside the lock, events can arrive
   in a different order than the changes happened. The alternative — foreign listener code running
   under this object's own lock — is the worse trade.
-- **No backpressure.** A slow listener slows the sampler thread down. Real hardware would need a
+- **The sampling rate is only as fast as the slowest listener.** `fire()` runs synchronously on the
+  sampler thread. A slow listener stretches the round, and the delay only starts afterwards — so
+  measurements become less frequent rather than piling up. That is coupling, not backpressure; real
+  backpressure would only appear with hardware that keeps measuring on its own, and would need a
   queue between the two.
 - **Two answers to listener failures in one package.** `EventSupport` takes an error handler,
   `TemperatureSampler` prints the stack trace itself. Consistency would cost a constructor
