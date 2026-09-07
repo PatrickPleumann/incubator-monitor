@@ -15,16 +15,9 @@ user interface.
 ## What this is about
 
 There is **no real hardware**. The sensor is simulated — but the concurrency is real: readings are
-produced on a different thread than the one drawing the interface. That boundary is where the
-interesting part of this project lives.
+produced on a different thread than the one drawing the interface.
 
-The project is the hands-on half of a move from C# to Java. The goal is deliberately not "as many
-features as possible" but **being traceable**: the decisions that carry weight are written down —
-including the ones deliberately left open. A small project that is thought through is worth more
-here than a large one that merely runs.
-
-Four topics come together in their natural order: the observer pattern (Java has no `event`
-keyword — if you want events, you build them), concurrency, binding to a UI that owns its own
+Four topics come together in their natural order: the observer pattern, concurrency, binding to a UI that owns its own
 thread, and testability.
 
 ---

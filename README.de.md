@@ -15,16 +15,9 @@ wird.
 ## Worum es geht
 
 Es gibt **keine echte Hardware**. Der Sensor ist simuliert — aber die Nebenläufigkeit ist echt:
-Der Messwert entsteht auf einem anderen Thread als dem, der die Oberfläche zeichnet. Genau an
-dieser Grenze liegt der interessante Teil.
+Der Messwert entsteht auf einem anderen Thread als dem, der die Oberfläche zeichnet.
 
-Das Projekt ist der praktische Teil eines Umstiegs von C# nach Java. Der Anspruch ist bewusst
-nicht „möglichst viele Features", sondern **nachvollziehbar zu sein**: Die Entscheidungen, die
-etwas tragen, sind aufgeschrieben — mitsamt denen, die bewusst offen geblieben sind. Ein kleines
-Projekt, das durchdacht ist, ist hier mehr wert als ein großes, das nur läuft.
-
-Vier Themen kommen dabei in ihrer natürlichen Reihenfolge zusammen: das Observer-Muster (Java hat
-kein `event`-Schlüsselwort — wer Ereignisse will, baut sie), Nebenläufigkeit, die Anbindung an
+Vier Themen kommen dabei in ihrer natürlichen Reihenfolge zusammen: das Observer-Pattern, Nebenläufigkeit, die Anbindung an
 eine UI mit eigenem Thread, und Testbarkeit.
 
 ---
